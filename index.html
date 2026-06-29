@@ -104,6 +104,27 @@ svg{display:block}
 .sec{font-family:'Roboto Slab',serif;font-weight:700;font-size:15px;color:var(--ink);margin:2px 0 2px}
 summary{list-style:none}summary::-webkit-details-marker{display:none}
 details[open]>summary .ic{transform:rotate(180deg)}
+
+/* ---------- PHONE / NARROW SCREENS ---------- */
+@media (max-width:640px){
+  body{display:block;overflow-x:hidden;overflow-y:auto;height:auto}
+  .rail{position:fixed;bottom:0;left:0;right:0;width:auto;height:auto;flex-direction:row;justify-content:flex-start;align-items:stretch;gap:2px;padding:5px 6px;border-right:none;border-top:1.5px solid var(--ink);overflow-x:auto;overflow-y:hidden;z-index:60}
+  .rb{flex:0 0 auto;width:58px;padding:6px 0;border-radius:11px}
+  .stage{height:auto;overflow:visible}
+  .wrap{max-width:100%;padding:12px 12px 90px}
+  .hdr .in{padding:11px 13px;gap:9px}
+  .greet{font-size:20px}
+  .date{font-size:11px}
+  .clock{font-size:30px}
+  .clock small{font-size:12px}
+  .wx{padding-left:10px}
+  .wx svg{width:26px;height:26px}
+  .plc{display:none}
+  .grid2,.grid3{grid-template-columns:1fr !important}
+  .grid2:has(.cam){grid-template-columns:repeat(2,1fr) !important}
+  .title{font-size:19px}
+  .card .in{padding:13px}
+}
 </style>
 </head>
 <body>

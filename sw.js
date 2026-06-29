@@ -1,7 +1,7 @@
 // NeelyBot service worker — network-first so the wall always shows fresh content,
 // with an offline cache fallback so the hub still loads if Wi-Fi drops.
-const CACHE = 'neelybot-v1';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
+const CACHE = 'neelybot-v3';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './logo.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

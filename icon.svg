@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#6E8B9A"/>
+  <!-- Highland-cow seal coin -->
+  <g transform="translate(141 58) scale(2.3)">
+    <circle cx="50" cy="50" r="47" fill="#FAF8F2" stroke="#3B3934" stroke-width="2.6"/>
+    <circle cx="50" cy="50" r="41" fill="none" stroke="#4E6B7A" stroke-width="0.9" stroke-dasharray="0.8 2.6"/>
+    <g transform="translate(0 -8)" fill="none" stroke="#3B3934" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M41 53 C33 47 22 46 15 50 C21 48 31 50 41 55"/>
+      <path d="M59 53 C67 47 78 46 85 50 C79 48 69 50 59 55"/>
+      <path d="M39 56 C39 48 44 45 50 45 C56 45 61 48 61 56 C61 70 56 77 50 77 C44 77 39 70 39 56 Z" fill="#FAF8F2"/>
+      <path d="M44 50 V57" stroke-width="1.2"/>
+      <path d="M50 47 V57" stroke-width="1.2"/>
+      <path d="M56 50 V57" stroke-width="1.2"/>
+      <ellipse cx="50" cy="69" rx="8.5" ry="6" fill="#FAF8F2"/>
+    </g>
+    <g transform="translate(0 -8)" fill="#3B3934">
+      <circle cx="46" cy="59" r="1.5"/>
+      <circle cx="54" cy="59" r="1.5"/>
+      <circle cx="47.5" cy="69" r="1"/>
+      <circle cx="52.5" cy="69" r="1"/>
+    </g>
+  </g>
+  <!-- Wordmark -->
+  <text x="256" y="404" text-anchor="middle" font-family="'Roboto Slab','Rockwell','Georgia',serif" font-size="58" font-weight="800" letter-spacing="2" fill="#FAF8F2">NEELYBOT</text>
+  <text x="256" y="440" text-anchor="middle" font-family="'Georgia',serif" font-size="20" letter-spacing="5" fill="#E4ECEF">GRACIE'S GROVE</text>
+</svg>

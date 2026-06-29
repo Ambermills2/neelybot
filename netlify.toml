@@ -1,0 +1,22 @@
+# NeelyBot — Netlify config
+[build]
+  publish = "."
+
+# Single-page app: every path serves index.html (existing files like icon.svg are served first).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+
+# Never let the HTML go stale on the wall tablet.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"

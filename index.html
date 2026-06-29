@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeelyBot — Gracie's Grove</title>
+<meta name="description" content="The Neely family wall hub.">
+<meta name="theme-color" content="#6E8B9A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="NeelyBot">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;600;700;800&family=Source+Sans+3:wght@400;600;700&family=Rye&display=swap" rel="stylesheet">
+<style>
+:root{
+ --canvas:#ECE8DF;--surface:#FAF8F2;--ink:#3B3934;--ink2:#7E7B72;--ink3:#9A958B;
+ --border:#E4DDCD;--frame:#CDBFA8;--line:#ECE5D6;
+ --blue:#6E8B9A;--blued:#4E6B7A;--bluet:#DCE6EA;--bluer:#B7CBD3;
+ --sage:#8AA075;--saged:#5E6B4C;--saget:#E6EBDE;
+ --clay:#C18E72;--clayd:#8E5B40;--clayt:#EFE0D5;
+ --gold:#CBA85E;--goldd:#8A6B22;--goldt:#F1E8CF;
+ --red:#A6624B;--redt:#F3E0DA;
+ --gray:#6B6860;--grayt:#E5E3DC;
+ --beige:#897349;--beiget:#ECE3D2;
+ --amber:#BE8A6E;--ryan:#6E8B9A;--caden:#C3A65E;--gavin:#8AA075;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--canvas);font-family:'Source Sans 3',system-ui,sans-serif;color:var(--ink);display:flex;overflow:hidden}
+.s{font-family:'Roboto Slab',Georgia,serif}
+svg{display:block}
+.g{fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* RAIL */
+.rail{width:80px;flex:none;background:var(--surface);border-right:1.5px solid var(--ink);display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 0;overflow-y:auto;height:100vh}
+.rail::-webkit-scrollbar{width:0}
+.rb{width:64px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;border-radius:13px;cursor:pointer;color:var(--ink2)}
+.rb svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rb span{font-size:8.5px;font-weight:700;letter-spacing:.01em}
+.rb:hover{background:#F1ECE0}
+.rb.on{background:var(--bluet);color:var(--blued)}
+
+/* STAGE */
+.stage{flex:1;height:100vh;overflow-y:auto}
+.wrap{max-width:980px;margin:0 auto;padding:16px 18px 60px}
+
+/* HEADER */
+.hdr{background:var(--surface);border:1.5px solid var(--ink);border-radius:12px;padding:4px;margin-bottom:12px}
+.hdr .in{border:1px solid var(--bluer);border-radius:8px;padding:12px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:relative}
+.hdr .corner{position:absolute;width:6px;height:6px;background:var(--blue);transform:rotate(45deg)}
+.greet{font-weight:700;font-size:26px;color:#5E8194;line-height:1}
+.date{font-size:12px;color:var(--ink2);margin-top:5px}
+.clock{font-weight:700;font-size:40px;color:var(--ink);line-height:.9}
+.clock small{font-size:15px;color:var(--blue);font-weight:600}
+.wx{display:flex;align-items:center;gap:8px;padding-left:14px;border-left:1px solid #C9D2D6}
+.plc{font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);background:#F1ECE0;border:1px solid var(--border);border-radius:5px;padding:2px 5px;position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);white-space:nowrap}
+
+/* SCREENS */
+.screen{display:none}
+.screen.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+.title{font-weight:800;font-size:22px;color:var(--ink);margin:2px 0 14px;display:flex;align-items:center;gap:10px}
+.title .tag{font-size:11px;font-weight:700;color:var(--ink3);background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:3px 10px;margin-left:auto}
+
+/* COMPONENTS */
+.card{background:var(--surface);border:1.5px solid var(--ink);border-radius:12px;padding:4px;margin-bottom:11px}
+.card .in{border:1px solid var(--frame);border-radius:9px;padding:14px 15px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px}
+.gl{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:14px 0 7px}
+.gl.first{margin-top:2px}
+.row{display:flex;align-items:center;gap:11px;padding:9px 2px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.av{border-radius:50%;color:#FAF8F2;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.bd{border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none}
+.bdc{border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;border-radius:99px;padding:4px 11px}
+.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 13px;border-radius:8px;background:var(--blue);color:#FAF8F2;font-size:12px;font-weight:700;border:none;cursor:pointer}
+.btn svg{width:14px;height:14px;fill:none;stroke:#FAF8F2;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.tog{width:42px;height:24px;border-radius:99px;position:relative;flex:none}
+.tog .k{position:absolute;top:3px;width:18px;height:18px;border-radius:50%;background:#FAF8F2}
+.on .k,.tog.on .k{left:21px}.off .k,.tog.off .k{left:3px;top:2px}
+.act{width:25px;height:25px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:none}
+.act svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.view{background:var(--bluet);color:var(--blued)}.edit{background:var(--grayt);color:var(--gray)}.del{background:var(--redt);color:var(--red)}
+.search{display:flex;align-items:center;gap:9px;height:38px;padding:0 13px;border-radius:9px;border:1.5px solid #D7D0C0;background:#FCFAF4;color:var(--ink3);font-size:12.5px}
+.track{height:8px;border-radius:99px;background:#E7E2D6;overflow:hidden}
+.fill{height:100%;border-radius:99px}
+.money{font-family:'Roboto Slab',serif;font-weight:700;font-size:11px;color:var(--saged);background:var(--saget);border:1px solid #C9D3BC;border-radius:6px;padding:1px 6px}
+.tn{font-family:'Roboto Slab',serif;font-weight:700;font-size:14px;color:var(--ink)}
+.ic{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.muted{color:var(--ink3)}
+.note{font-size:11px;color:var(--ink3);margin-top:13px;padding-top:11px;border-top:1px solid var(--line);display:flex;gap:7px;align-items:flex-start}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;display:flex;align-items:center;gap:11px}
+.cam{position:relative;border-radius:10px;overflow:hidden;border:1.5px solid var(--ink);aspect-ratio:4/3;background:linear-gradient(160deg,#3c444a,#23282b)}
+.live{position:absolute;top:6px;left:6px;display:flex;align-items:center;gap:4px;font-size:8px;font-weight:700;color:#F4EFE6}
+.camname{position:absolute;bottom:5px;left:7px;font-size:10px;font-weight:700;color:#F4EFE6}
+.sec{font-family:'Roboto Slab',serif;font-weight:700;font-size:15px;color:var(--ink);margin:2px 0 2px}
+summary{list-style:none}summary::-webkit-details-marker{display:none}
+details[open]>summary .ic{transform:rotate(180deg)}
+</style>
+</head>
+<body>
+
+<nav class="rail" id="rail"></nav>
+
+<div class="stage">
+ <div class="wrap">
+  <div class="hdr"><div class="in">
+    <span class="corner" style="top:6px;left:6px"></span><span class="corner" style="top:6px;right:6px"></span>
+    <div style="position:relative;flex:none">
+     <svg viewBox="0 0 100 100" width="44" height="44"><circle cx="50" cy="50" r="47" fill="#FAF8F2" stroke="#3B3934" stroke-width="2.6"/><circle cx="50" cy="50" r="41" fill="none" stroke="#6E8B9A" stroke-width="0.9" stroke-dasharray="0.8 2.6"/><g fill="none" stroke="#3B3934" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M41 53 C33 47 22 46 15 50 C21 48 31 50 41 55"/><path d="M59 53 C67 47 78 46 85 50 C79 48 69 50 59 55"/><path d="M39 56 C39 48 44 45 50 45 C56 45 61 48 61 56 C61 70 56 77 50 77 C44 77 39 70 39 56 Z" fill="#FAF8F2"/><path d="M44 50 V57" stroke-width="1.2"/><path d="M50 47 V57" stroke-width="1.2"/><path d="M56 50 V57" stroke-width="1.2"/><ellipse cx="50" cy="69" rx="8.5" ry="6" fill="#FAF8F2"/></g><g fill="#3B3934"><circle cx="46" cy="59" r="1.5"/><circle cx="54" cy="59" r="1.5"/><circle cx="47.5" cy="69" r="1"/><circle cx="52.5" cy="69" r="1"/></g></svg>
+     <span class="plc">Placeholder Logo</span>
+    </div>
+    <div><div class="greet" id="greet">Mornin', Y'all</div><div class="date" id="date">Gracie's Grove · Burnet, TX</div></div>
+    <div style="flex:1;min-width:8px"></div>
+    <div class="clock" id="clock">--:--</div>
+    <div class="wx"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#C9A24E" stroke-width="1.6"><circle cx="8.5" cy="8" r="3"/><path d="M8.5 2.2v1.8M3 8h1.8M4.7 4.2 6 5.5M12.3 4.2 11 5.5"/></g><path d="M8 19h8.2a3.4 3.4 0 0 0 .3-6.8A5 5 0 0 0 7 12.6 3.4 3.4 0 0 0 8 19Z" stroke="#6E8B9A" stroke-width="1.6"/></svg><div><div class="s" style="font-weight:700;font-size:18px">86&deg;</div><div style="font-size:10px;color:var(--ink2)">Burnet</div></div></div>
+  </div></div>
+
+  <div id="screens"></div>
+ </div>
+</div>
+
+<script>
+const C={caden:'#C3A65E',gavin:'#8AA075',amber:'#BE8A6E',ryan:'#6E8B9A'};
+function call(stroke){return `<svg class="ic" width="17" height="17" viewBox="0 0 24 24" stroke="${stroke}" stroke-width="1.9"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 5 5L17 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 4 6 2 2 0 0 1 6 4"/></svg>`}
+const VED=`<span class="act view"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.3"/></svg></span><span class="act edit"><svg viewBox="0 0 24 24"><path d="M5 19h3l9.5-9.5-3-3L5 16zM14.5 6.5l3 3"/></svg></span><span class="act del"><svg viewBox="0 0 24 24"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></span>`;
+const ED=`<span class="act edit"><svg viewBox="0 0 24 24"><path d="M5 19h3l9.5-9.5-3-3L5 16zM14.5 6.5l3 3"/></svg></span><span class="act del"><svg viewBox="0 0 24 24"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></span>`;
+const addBtn=t=>`<button class="btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>${t||'Add'}</button>`;
+const searchBox=t=>`<div class="search"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" stroke="#9A958B" stroke-width="2"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5 20 20"/></svg>${t}</div>`;
+const av=(n,c,s)=>`<span class="av" style="width:${s||34}px;height:${s||34}px;font-size:${(s||34)/2.6}px;background:${c}">${n}</span>`;
+function title(t,tag){return `<div class="title"><span>${t}</span>${tag?`<span class="tag">${tag}</span>`:''}</div>`}
+
+const SCR={};
+
+/* ---------- HOME ---------- */
+SCR.home=()=>title('Home')+`
+<div class="grid2">
+ <div class="card"><div class="in"><div class="lbl">Today</div>
+  ${[[C.amber,'Farmers Market','8:30 · Amber'],[C.ryan,'Vet — Gracie','9:00 · Ryan'],[C.caden,'Baseball Practice','5:30 · Caden']].map(e=>`<div class="row" style="border:none;padding:6px 0;cursor:pointer"><span style="width:4px;height:28px;border-radius:3px;background:${e[0]}"></span><div style="flex:1"><b style="font-size:13px">${e[1]}</b><div class="muted" style="font-size:11px">${e[2]}</div></div></div>`).join('')}
+  <div class="note" style="margin-top:8px"><span>Tap any event → opens the Calendar.</span></div>
+ </div></div>
+ <div class="card"><div class="in"><div class="lbl">This Week</div>
+  ${[[C.gavin,'Mon · Trash Day','Gavin'],[C.caden,'Wed · Game vs. Burnet','6:00 · Caden'],[C.ryan,'Fri · Hay Delivery','10:00 · Ryan'],['#B7B3AA','Sat · Church BBQ','Everyone']].map(e=>`<div class="row" style="border:none;padding:6px 0;cursor:pointer"><span style="width:4px;height:28px;border-radius:3px;background:${e[0]}"></span><div style="flex:1"><b style="font-size:13px">${e[1]}</b><div class="muted" style="font-size:11px">${e[2]}</div></div></div>`).join('')}
+ </div></div>
+</div>
+<div class="grid2">
+ <div class="card"><div class="in"><div class="lbl">Chores Today</div>
+  ${[['Amber',C.amber,'4/4'],['Ryan',C.ryan,'2/3'],['Caden',C.caden,'3/5'],['Gavin',C.gavin,'1/2']].map(p=>`<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">${av(p[0][0],p[1],24)}<span style="font-size:12px;font-weight:600;width:48px">${p[0]}</span><span class="track" style="flex:1"><span class="fill" style="width:${parseInt(p[2])/parseInt(p[2].split('/')[1])*100}%;background:${p[1]}"></span></span><b style="font-size:11px;color:var(--saged)">${p[2]}</b></div>`).join('')}
+ </div></div>
+ <div class="card"><div class="in"><div class="lbl">Reminders</div>
+  ${[['Water Filter (Sink)','Due now · Ryan','red'],['Register The Boat','Due now','red'],['Pay Bills','Jul 1','gold'],['Simparica Trio','Jul 1','gold']].map(r=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px"><span style="width:8px;height:8px;border-radius:50%;flex:none;background:${r[2]==='red'?'var(--red)':'var(--gold)'}"></span><div style="flex:1"><b style="font-size:12.5px">${r[0]}</b></div><span class="muted" style="font-size:10.5px;font-weight:600">${r[1]}</span></div>`).join('')}
+ </div></div>
+</div>
+<div class="card"><div class="in"><div class="lbl">Quick Open</div>
+ <div class="grid2" style="grid-template-columns:repeat(5,1fr)">${[['smarthome','Smart Home','M4 11.5 12 5l8 6.5M6.5 10.5v8.5h11v-8.5M12 19v-3.4','var(--saged)','var(--saget)'],['remotes','Remotes','M8 3h8a1.5 1.5 0 0 1 1.5 1.5v15A1.5 1.5 0 0 1 16 21H8a1.5 1.5 0 0 1-1.5-1.5v-15A1.5 1.5 0 0 1 8 3M12 6.5h.01M10 9.5h4M10 12h4','var(--clayd)','var(--clayt)'],['shopping','Shopping List','M3 4.5h2.2l2 11h9.8l1.8-8H7','var(--blued)','var(--bluet)'],['emergency','Emergency','M12 4 2.8 20h18.4zM12 10v4M12 17v.01','var(--red)','var(--redt)'],['kidsbank','Bank','M12 3v18M16 7.5c0-2-1.8-3-4-3s-4 1.2-4 3 1.8 2.5 4 3 4 1.2 4 3-1.8 3-4 3-4-1-4-3','var(--goldd)','var(--goldt)']].map(q=>`<div onclick="go('${q[0]}')" class="tile" style="cursor:pointer;flex-direction:column;text-align:center;gap:9px;padding:17px 8px"><span class="bdc" style="width:44px;height:44px;background:${q[4]};color:${q[3]}"><svg class="ic" width="23" height="23" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><path d="${q[2]}"/></svg></span><b style="font-size:12px">${q[1]}</b></div>`).join('')}</div>
+</div></div>`;
+
+/* ---------- CALENDAR ---------- */
+SCR.calendar=()=>title('Calendar')+`<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><div style="display:flex;gap:7px;flex:1">${['Day','Week','Month','Year'].map((f,i)=>`<span class="chip" style="${i===2?'background:var(--blue);color:#fff':'border:1.5px solid var(--border);color:var(--ink3)'}">${f}</span>`).join('')}</div><span class="muted s" style="font-size:13px;font-weight:700">June 2026</span></div><div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:4px">${[['Amber',C.amber],['Ryan',C.ryan],['Caden',C.caden],['Gavin',C.gavin],['Everyone','#B7B3AA']].map(p=>`<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--ink2)"><span style="width:9px;height:9px;border-radius:50%;background:${p[1]}"></span>${p[0]}</span>`).join('')}</div></div></div>
+<div class="card"><div class="in"><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">
+${['Sun 28','Mon 29','Tue 30','Wed 1','Thu 2','Fri 3','Sat 4'].map((d,i)=>`<div style="text-align:center"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink3)">${d.split(' ')[0]}</div><div class="s" style="font-weight:700;font-size:15px;${i===0?'background:var(--blue);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;margin:3px auto 0':'margin-top:3px'}">${d.split(' ')[1]}</div></div>`).join('')}
+${[
+ [[C.ryan,'9a Vet'],[C.amber,'Market'],['#B7B3AA','Church']],
+ [[C.gavin,'7a Trash'],[C.caden,'5:30 Ball']],
+ [[C.amber,'Dentist']],
+ [[C.caden,C.ryan,'6p Game']],
+ [[C.ryan,'10a Hay']],
+ [],
+ [['#B7B3AA','BBQ'],[C.caden,C.gavin,'Tourney']]
+].map((day,i)=>`<div style="min-height:92px;background:${i===0?'#EFF3F0':'#F4EEE1'};border-radius:8px;padding:5px 4px">${day.map(e=>{const txt=e[e.length-1];const cols=e.slice(0,-1);return `<div style="display:flex;gap:5px;background:#FAF6EC;border:1px solid #EAE2D2;border-radius:5px;overflow:hidden;margin-bottom:4px"><div style="width:4px;display:flex;flex-direction:column">${cols.map(c=>`<span style="flex:1;background:${c}"></span>`).join('')}</div><div style="padding:3px 4px 3px 0;font-size:9px;font-weight:700">${txt}</div></div>`}).join('')}</div>`).join('')}
+</div><div class="note"><span>An event with more than one person shows a stacked color bar (one stripe per linked family member).</span></div></div></div>`;
+
+/* ---------- CHORES ---------- */
+SCR.chores=()=>title('Chores','Sunday · today')+`
+<div class="card"><div class="in" style="display:flex;align-items:center;gap:9px"><div class="lbl" style="margin:0;flex:1">Whenever</div>${addBtn('Add Chore')}</div></div>
+<div class="card"><div class="in">
+ ${[['C',C.caden,'Backyard','$1','c'],['C',C.caden,'Clean Litter Box','$1','c'],['C',C.caden,'Dishes','no','c'],['G',C.gavin,'Dishes','no','w'],['G',C.gavin,'Kitchen Trash','no','c'],['G',C.gavin,'Mow Backyard Lawn','$3','alert']].map(c=>`<div class="row">${av(c[0],c[1],26)}<div style="flex:1;min-width:0"><b style="font-size:13px;display:block">${c[2]}</b>${c[4]==='alert'?'<span class="chip" style="color:var(--red);background:var(--redt);font-size:9px;margin-top:4px">⚠ 1 Day Left</span>':''}</div><span style="width:54px;text-align:right;flex:none">${c[3]==='no'?'<span class="muted" style="font-size:10px;font-weight:700">No Pay</span>':`<span class="money">${c[3]}</span>`}</span><span style="width:132px;display:flex;justify-content:flex-end;flex:none">${c[4]==='w'?'<span class="chip" style="color:var(--goldd);background:var(--goldt)">Waiting Approval</span>':'<span class="chip" style="color:var(--saged);background:none;border:1.5px solid var(--sage)">✓ Complete</span>'}</span></div>`).join('')}
+</div></div>
+<div class="card"><div class="in"><div class="lbl" style="margin-bottom:7px">Night</div><div class="row">${av('G',C.gavin,26)}<div style="flex:1;min-width:0"><b style="font-size:13px;display:block">Mineral Feed</b><div class="muted" style="font-size:10px">Cows &amp; goats · 1× nightly</div></div><span style="width:54px;text-align:right;flex:none"><span class="money">$0.50</span></span><span style="width:132px;display:flex;justify-content:flex-end;flex:none"><span class="chip" style="color:var(--saged);background:none;border:1.5px solid var(--sage)">✓ Complete</span></span></div></div></div>`;
+
+/* ---------- FINANCE (Banking + Bills) ---------- */
+const kidsBankHTML=()=>`<div class="card"><div class="in"><div class="sec" style="margin-bottom:11px">Banking · Kids' Money</div>${[['Caden',C.caden,6.35,1.75,[['Nintendo Switch 2',499,'Been saving forever!'],['New Baseball Glove',120,'For fall ball']]],['Gavin',C.gavin,4.10,0.95,[['Dirt Bike Helmet',90,'Mine cracked riding'],['Pokémon Card Box',25,'']]]].map(k=>`<div class="tile" style="display:block;background:#FCFAF4;margin-bottom:11px"><div style="display:flex;align-items:center;gap:10px">${av(k[0][0],k[1],34)}<div style="flex:1"><b class="s" style="font-size:15px">${k[0]}</b><div style="font-size:10.5px;color:var(--saged);font-weight:700">+$${k[3].toFixed(2)} this week</div></div><div class="s" style="font-weight:800;font-size:26px">$${k[2].toFixed(2)}</div></div><div style="display:flex;gap:7px;margin-top:10px"><span style="flex:1;padding:7px 0;border-radius:8px;border:1.5px solid #CBC8BD;font-size:10px;font-weight:700;text-align:center">▲ Deposit · Hub Code</span><span style="flex:1;padding:7px 0;border-radius:8px;border:1.5px solid #CBC8BD;font-size:10px;font-weight:700;text-align:center">▼ Withdraw</span></div><div style="display:flex;align-items:center;margin-top:14px"><span class="gl" style="margin:0;flex:1">Savings Goals</span><button class="btn" style="height:26px;font-size:10px;padding:0 9px"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Goal</button></div>${k[4].map(g=>{const pct=Math.min(100,Math.round(k[2]/g[1]*100));const left=(g[1]-k[2]).toFixed(2);return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 11px;margin-top:8px"><div style="display:flex;align-items:center;gap:8px"><b class="s" style="flex:1;font-size:13.5px">${g[0]}</b><b class="s" style="font-size:13.5px">$${g[1]}</b>${ED}</div>${g[2]?`<div class="muted" style="font-size:11px;font-style:italic;margin-top:3px">"${g[2]}"</div>`:''}<div class="track" style="margin-top:9px"><div class="fill" style="width:${pct}%;background:var(--sage)"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px"><b style="color:var(--saged)">$${k[2].toFixed(2)} saved</b><span class="muted">$${left} to go</span></div></div>`}).join('')}</div>`).join('')}<div class="note"><span><b>Deposit</b> needs the Hub Code. <b>Add Goal</b> captures a title, a short description &amp; a price — then NeelyBot shows how much they've saved and how much more to earn.</span></div></div></div>`;
+SCR.kidsbank=()=>title('Kids Banking')+kidsBankHTML();
+SCR.finance=()=>title('Finance')+`
+<div class="card"><div class="in"><div style="display:flex;gap:8px"><span class="chip" style="background:var(--blue);color:#fff">Banking</span><span class="chip" style="border:1.5px solid var(--border);color:var(--ink3)">Bills</span></div></div></div>
+${kidsBankHTML()}
+<div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:9px"><span class="sec" style="flex:1">Bills · $4,352 / month</span>${addBtn('Add Bill')}</div>
+${[['2','2nd','Mortgage','Security State · from Wells','$1,300','auto'],['15','15th','5th Wheel Trailer','Manual Pay','$500','man'],['15','15th','Boat','Huntington · from Wells','$500','auto'],['20','20th','AT&amp;T Phone','Manual Pay','$352','man'],['24','24th','Tesla Payment','from Wells','$425','auto'],['28','28th','Truck (Denali)','Chase · from Wells','$1,275','auto']].map(b=>`<div class="row"><span style="width:30px;text-align:center"><b class="s" style="font-size:14px">${b[0]}</b><div style="font-size:7px;font-weight:700;text-transform:uppercase;color:var(--ink3)">${b[1]}</div></span><div style="flex:1"><b style="font-size:12.5px">${b[2]}</b><div class="muted" style="font-size:10px">${b[3]} <span class="chip" style="font-size:8px;padding:1px 6px;${b[5]==='auto'?'color:var(--saged);background:var(--saget)':'color:var(--goldd);background:var(--goldt)'}">${b[5]==='auto'?'Autopay':'No Autopay'}</span></div></div><b class="s" style="font-size:13px">${b[4]}</b>${ED}</div>`).join('')}</div></div>
+<div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:9px"><span class="sec" style="flex:1">Banks</span>${addBtn()}</div>${[['Wells Fargo','Primary'],['Chase','Truck Loan'],['Security State Trust','Mortgage'],['Citi','Card']].map(b=>`<div class="row"><span class="bd" style="width:32px;height:32px;background:var(--saget);color:var(--saged)"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><path d="M4 9h16M5 9 12 4l7 5M6 9v8M18 9v8M4 17h16"/></svg></span><div style="flex:1"><b style="font-size:13px">${b[0]}</b><div class="muted" style="font-size:10px">${b[1]}</div></div><button class="btn" style="height:28px;font-size:10.5px;padding:0 11px"><svg viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-9 9M11 5H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/></svg>Open Site</button>${ED}</div>`).join('')}</div></div>`;
+
+/* ---------- SHOPPING ---------- */
+SCR.shopping=()=>title('Shopping')+`
+<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:9px;margin-bottom:11px"><div class="lbl" style="margin:0;flex:1">Lists</div>${addBtn('Add Item')}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${['Grocery','Amazon','Hardware','Sporting Goods','Other'].map((t,i)=>`<span class="chip" style="${i===0?'background:var(--clayt);border:1.5px solid var(--clay);color:var(--clayd)':'border:1.5px solid var(--border);color:var(--ink3)'}">${t}</span>`).join('')}</div></div></div>
+<div class="card"><div class="in"><div class="lbl">Grocery List</div>
+${[['Milk · 1 Gal','high'],['Eggs · 2 Dozen',''],['Bread',''],['Chicken Feed','med'],['Bag Of Ice · 3','trip'],['Snacks &amp; Chips','trip']].map(i=>`<div class="row"><span style="width:19px;height:19px;border-radius:6px;border:2px solid #CBC8BD;flex:none"></span><b style="flex:1;font-size:13px">${i[0]}</b>${i[1]==='high'?'<span class="chip" style="font-size:8px;color:var(--red);background:var(--redt)">Urgent</span>':i[1]==='med'?'<span class="chip" style="font-size:8px;color:var(--goldd);background:var(--goldt)">Soon</span>':''}${i[1]==='trip'?'<span class="chip" style="font-size:8px;color:var(--beige);background:var(--beiget)">Houston Trip</span>':''}</div>`).join('')}</div></div>
+<div class="card"><div class="in"><div class="lbl">Our Stores · Add To Cart</div><div class="grid2" style="grid-template-columns:repeat(4,1fr)">${['HEB','Walmart','Home Depot','Lowes','Tractor Supply','Amazon',"Dick's",'+ Store'].map(st=>`<div class="tile" style="flex-direction:column;text-align:center;gap:7px;padding:14px 6px;cursor:pointer"><span class="bdc" style="width:34px;height:34px;background:var(--bluet);color:var(--blued)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3 4.5h2.2l2 11h9.8l1.8-8H7"/></svg></span><b style="font-size:10.5px">${st}</b></div>`).join('')}</div><div class="note"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" stroke="#9A958B" stroke-width="2" style="flex:none"><rect x="5.5" y="11" width="13" height="8" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg><span>"Add To Cart" loads items into the store's app — but <b>nobody can hit Buy without the Hub password.</b></span></div></div></div>`;
+
+/* ---------- REMINDERS ---------- */
+SCR.reminders=()=>title('Reminders','7 due now')+`<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:9px"><div style="display:flex;gap:6px;flex-wrap:wrap;flex:1">${[['All',''],['Amber',C.amber],['Ryan',C.ryan],['Caden',C.caden],['Gavin',C.gavin],['Anyone','#B7B3AA']].map((f,i)=>`<span class="chip" style="${i===0?'background:var(--blue);color:#fff':'border:1.5px solid var(--border);color:var(--ink2)'}">${f[1]?`<span style="width:8px;height:8px;border-radius:50%;background:${f[1]}"></span>`:''}${f[0]}</span>`).join('')}</div>${addBtn()}</div></div></div>
+<div class="card"><div class="in"><div class="gl first" style="color:var(--red)">⚠ Due Now</div>
+${[['Water Filter (Sink)','Every 6 months','Ryan'],['Well Sediment Filter','Every 6 months','Anyone'],['Register The Boat','Tige R22','Ryan'],['Tesla — Change Tires','','Amber'],['Review AT&amp;T Bill','Make updates','Amber'],['Boat Registration','','Ryan'],['Dewormer — Annie','Last Jun 1','Gavin']].map(r=>`<div class="row"><span style="width:19px;height:19px;border-radius:6px;border:2px solid #CBC8BD;flex:none"></span><div style="flex:1"><b style="font-size:13px">${r[0]}</b>${r[1]?`<div class="muted" style="font-size:10px">${r[1]}</div>`:''}</div><span class="chip" style="font-size:9px;color:var(--ink3);background:#ECEAE2">${r[2]}</span></div>`).join('')}</div></div>
+<div class="card"><div class="in"><div class="gl first muted">Coming Up</div>
+${[['Pay Bills','1st &amp; 15th','Jul 1'],['AC Filters','1st · Ryan','Jul 1'],['Simparica Trio','Monthly 1st','Jul 1'],['Pest Control','15th','Jul 15']].map(r=>`<div class="row"><span style="width:19px;height:19px;border-radius:6px;border:2px solid #CBC8BD;flex:none"></span><div style="flex:1"><b style="font-size:13px">${r[0]}</b><div class="muted" style="font-size:10px">${r[1]}</div></div><span class="chip" style="font-size:9px;color:var(--goldd);background:var(--goldt)">${r[2]}</span></div>`).join('')}</div></div>`;
+
+/* ---------- PROJECTS ---------- */
+SCR.projects=()=>title('Home Projects')+`<div class="card"><div class="in" style="display:flex;align-items:center;gap:9px"><div style="display:flex;gap:8px;flex:1">${['All','In Progress','Planning','Done'].map((f,i)=>`<span class="chip" style="${i===0?'background:var(--blue);color:#fff':'border:1.5px solid var(--border);color:var(--ink3)'}">${f}</span>`).join('')}</div>${addBtn('Add Project')}</div></div>
+<div class="card"><div class="in">${PROJECTS.map((p,i)=>{const done=p.steps.filter(s=>s[1]).length;const pct=Math.round(done/p.steps.length*100);const cc=p.color;return `<div class="tile" onclick="openProject(${i})" style="display:block;margin-bottom:9px;cursor:pointer"><div style="display:flex;align-items:center;gap:9px"><b class="s" style="flex:1;font-size:14.5px">${p.name}</b><span class="chip" style="font-size:9px;${cc==='red'?'color:var(--red);background:var(--redt)':cc==='blue'?'color:var(--blued);background:var(--bluet)':cc==='gold'?'color:var(--goldd);background:var(--goldt)':'color:var(--saged);background:var(--saget)'}">${p.status}</span><span class="act" style="color:#C7C0B0"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></div><div class="track" style="margin-top:10px"><div class="fill" style="width:${pct}%;background:${cc==='gold'?'var(--gold)':cc==='sage'?'var(--sage)':cc==='red'?'var(--red)':'var(--blue)'}"></div></div><div class="muted" style="font-size:11px;margin-top:7px">${done} of ${p.steps.length} steps done</div></div>`}).join('')}<div class="note"><span>Tap a project to open its steps &amp; progress. (Also created: Gutters, Water System Pipes, Front Porch, Shed Pad, Green House, Shed, Garden, Stock Pond, Lawn.)</span></div></div></div>`;
+
+/* ---------- VAULT ---------- */
+SCR.vault=()=>title('Password Vault')+`<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:9px;margin-bottom:11px"><div class="s" style="font-weight:700;font-size:15px;flex:1">Saved Logins</div>${addBtn()}</div>
+${[['Roku','neelyranch@gmail.com'],['Netflix','neelyfamily'],['Home Wi-Fi','GraciesGrove_5G'],['Starlink','info@…'],['Blink','neelyranch@gmail.com']].map(v=>`<div class="row"><span class="bdc" style="width:32px;height:32px;background:var(--goldt);color:var(--goldd)"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg></span><div style="flex:1"><b style="font-size:13px">${v[0]}</b><div class="muted s" style="font-size:11px">${v[1]} · ••••••</div></div>${VED}</div>`).join('')}<div class="note"><span>🔓 Unlocked with the Hub Code · auto-locks after 2 minutes.</span></div></div></div>`;
+
+/* ---------- SETTINGS ---------- */
+SCR.settings=()=>title('Settings')+`<div class="card"><div class="in"><div class="lbl">General</div>
+${[['Hub Code','Unlocks chores &amp; vault','•••• · Change'],['Greeting','',"Mornin', Y'all"],['Day &amp; Night','','Auto · Sunset'],['Weather Towns','Burnet +4','5 Towns'],['Logo','Pending final art','Placeholder']].map(r=>`<div class="row"><div style="flex:1"><b style="font-size:13px">${r[0]}</b>${r[1]?`<div class="muted" style="font-size:10.5px">${r[1]}</div>`:''}</div><span class="muted" style="font-size:12px;font-weight:600">${r[2]}</span></div>`).join('')}</div></div>
+<div class="card"><div class="in"><div class="lbl">Family</div>${[['Amber',C.amber,'Mom · Dec 5'],['Ryan',C.ryan,'Dad · Jan 31'],['Caden',C.caden,'Son · Jul 10'],['Gavin',C.gavin,'Son · Sep 5']].map(m=>`<div class="row">${av(m[0][0],m[1],28)}<div style="flex:1"><b style="font-size:13px">${m[0]}</b><div class="muted" style="font-size:10.5px">${m[2]}</div></div><span class="act" style="color:#C7C0B0"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></div>`).join('')}</div></div>
+<div class="card"><div class="in"><div class="lbl">Connected Accounts</div>${['Spotify','Apple Music','Blink Cameras','Starlink','Roku · 3 TVs','Samsung TV','Tesla','SmartThings','Google Calendar','PetNation Feeder'].map(a=>`<div class="row"><b style="font-size:13px;flex:1">${a}</b><span class="chip" style="color:var(--saged);background:var(--saget)">Connected</span></div>`).join('')}</div></div>`;
+
+/* ---------- TRIPS ---------- */
+SCR.trips=()=>title('Trips')+`<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:9px"><div style="display:flex;gap:8px;flex:1;flex-wrap:wrap">${['Houston Tournament','Phoenix Wedding'].map((t,i)=>`<span class="chip" style="${i===0?'background:var(--beiget);color:var(--beige);border:1.5px solid #C9B68E':'border:1.5px solid var(--border);color:var(--ink2)'}">${t}</span>`).join('')}</div>${addBtn('New Trip')}</div></div></div>
+<div class="card"><div class="in"><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1"><div class="sec">Houston — PG All-State</div><div class="muted" style="font-size:12px;margin-top:3px">Jul 29 – Aug 1 · Gavin · need reservations</div></div>${ED}</div>
+<div class="lbl" style="margin-top:13px">Packing — Tap A Name</div><div style="display:flex;gap:9px;flex-wrap:wrap">${[['Amber',C.amber],['Ryan',C.ryan],['Caden',C.caden],['Gavin',C.gavin]].map(p=>`<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:99px;border:1.5px solid ${p[1]};color:${p[1]};font-size:12px;font-weight:700">${av(p[0][0],p[1],20)}${p[0]}</span>`).join('')}</div>
+<details open style="margin-top:16px"><summary style="display:flex;align-items:center;cursor:pointer;padding:3px 0"><span class="lbl" style="margin:0;flex:1">Shopping List</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" stroke="#9A958B" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></summary><div style="display:flex;justify-content:flex-end;margin:8px 0 2px">${addBtn('Add Item')}</div>${[['Bag Of Ice · 3'],['Snacks &amp; Chips'],['Sunscreen'],['Paper Towels']].map(i=>`<div class="row"><span style="width:19px;height:19px;border-radius:6px;border:2px solid #CBC8BD;flex:none"></span><b style="flex:1;font-size:13px">${i[0]}</b><button class="btn" style="height:27px;font-size:10px;padding:0 10px;background:var(--sage)">Move To Shopping List</button>${ED}</div>`).join('')}</details>
+<div class="lbl" style="margin-top:18px">Reservations</div><div class="muted" style="font-size:11.5px">Hotel + check-in times — TBD</div></div></div>`;
+
+/* ---------- PHOTOS ---------- */
+SCR.photos=()=>title('Photos','24 Photos · Drag To Reorder')+`<div class="card"><div class="in" style="display:flex;justify-content:flex-end">${addBtn('Add Photos')}</div></div>
+<div class="card"><div class="in"><div class="grid2"><div class="tile" style="display:block"><div class="lbl">Each Photo</div><b class="s" style="font-size:18px">5 sec</b></div><div class="tile"><div style="flex:1"><b style="font-size:12.5px">Shuffle</b></div><span class="tog on" style="background:var(--blue)"><span class="k"></span></span></div></div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:11px">${['dash','#c9a06c,#8aa075','#6e8b9a,#a6c0cc','#be8a6e,#c3a65e','#9daa80,#647646','#cfbda0,#8a9a78','#a6c0cc,#cfd3c2','#c9a06c,#9c7048','#8aa075,#586547','#d9c49b,#c18e72'].map(g=>g==='dash'?`<div style="aspect-ratio:1;border:1.5px dashed #C7C0B0;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--ink3);font-size:10px;font-weight:700"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" stroke="#9A958B" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add</div>`:`<div style="aspect-ratio:1;border-radius:10px;border:1px solid #D7D0C0;background:linear-gradient(140deg,${g})"></div>`).join('')}</div></div></div>`;
+
+/* ---------- MUSIC / NOW PLAYING ---------- */
+SCR.nowplaying=()=>title('Music','Spotify')+`<div class="card"><div class="in"><div style="display:flex;gap:15px;align-items:center"><div style="width:110px;height:110px;border-radius:12px;background:linear-gradient(150deg,#9c7048,#caa06c)"></div><div style="flex:1"><div class="s" style="font-weight:800;font-size:22px">Chicken Fried</div><div class="muted" style="font-size:13px;margin-top:3px">Zac Brown Band</div><span class="chip" style="margin-top:10px;color:var(--saged);background:var(--saget)">Zac Brown Band Radio</span></div></div>
+<div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap"><span class="chip" style="border:1.5px solid #DEB6A9;background:var(--redt);color:var(--red);height:34px">♥ Favorited</span><span class="chip" style="border:1.5px solid #CBC8BD;background:none;color:var(--ink);height:34px">+ Add To Playlist</span><span class="chip" style="border:1.5px solid #CBC8BD;background:none;color:var(--ink);height:34px">▶ Photo Slideshow</span></div>
+<div class="track" style="margin-top:14px"><div class="fill" style="width:42%;background:var(--blue)"></div></div>
+<div style="display:flex;align-items:center;justify-content:center;gap:18px;margin-top:14px;color:var(--ink)"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 5.5v13M18 5.5l-9 6.5 9 6.5z"/></svg><span style="width:56px;height:56px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center"><svg class="ic" width="24" height="24" viewBox="0 0 24 24" stroke="#FAF8F2" stroke-width="2"><path d="M9 5.5v13M15 5.5v13"/></svg></span><svg class="ic" width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 5.5l9 6.5-9 6.5zM17 5.5v13"/></svg><svg class="ic" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></div></div></div>
+<div class="card"><div class="in"><div class="lbl">Playing On</div><div style="display:flex;gap:8px;flex-wrap:wrap">${['Living Room','Kitchen','Patio','Barn'].map((s,i)=>`<span class="chip" style="${i===0?'border:2px solid var(--blue);background:var(--bluet);color:var(--blued)':'border:1.5px solid var(--border);color:var(--ink2)'}">${s}</span>`).join('')}</div><div class="lbl" style="margin-top:13px">Sources</div><div style="display:flex;gap:8px">${['Apple Music','Spotify'].map(a=>`<span class="chip" style="border:1.5px solid var(--border);color:var(--ink2)">${a}</span>`).join('')}</div></div></div>`;
+
+/* ---------- MAINTENANCE (Vehicles + Pros + Reminders) ---------- */
+SCR.maintenance=()=>title('Maintenance')+`
+<div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:9px"><span class="sec" style="flex:1">Vehicles</span>${addBtn()}</div>
+${[['Truck','GMC 3500 Denali · 2019',[['Reg · Jan','ok']]],['Tesla','Model 3 · 2022 AWD',[['Tires Due','warn'],['Reg · Mar','ok']]],['5th Wheel','Keystone Avalanche · 2022',[['Service','gold']]],['Boat','Tige R22 · 2019',[['Register Now','warn']]]].map(v=>`<div class="row"><span class="bd" style="width:34px;height:34px;background:var(--bluet);color:var(--blued)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M4 16l1.6-5.2A2 2 0 0 1 7.5 9.5h9a2 2 0 0 1 1.9 1.3L20 16M3 16h18v3h-3v-1.4H6V19H3z"/><circle cx="7" cy="16.6" r="1.3"/><circle cx="17" cy="16.6" r="1.3"/></svg></span><div style="flex:1"><b style="font-size:13px">${v[0]}</b><div class="muted" style="font-size:10px">${v[1]}</div></div>${v[2].map(c=>`<span class="chip" style="font-size:9px;${c[1]==='warn'?'color:var(--red);background:var(--redt)':c[1]==='gold'?'color:var(--goldd);background:var(--goldt)':'color:var(--saged);background:var(--saget)'}">${c[0]}</span>`).join('')}<span class="act edit"><svg viewBox="0 0 24 24"><path d="M5 19h3l9.5-9.5-3-3L5 16zM14.5 6.5l3 3"/></svg></span></div>`).join('')}</div></div>
+<div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:9px"><span class="sec" style="flex:1">Pros</span>${addBtn()}</div>
+<div class="row"><span class="bd" style="width:32px;height:32px;background:var(--bluet);color:var(--blued)"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="10" y="4" width="4" height="11" rx="2"/><circle cx="12" cy="17.5" r="3"/></svg></span><div style="flex:1"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink3)">Heat / Air</div><b style="font-size:13px">Off-Duty Heating &amp; AC</b><div class="muted" style="font-size:10px">(512) 925-3090 · Bryce Robinson</div></div>${VED}</div>
+${[['Handyman'],['Electrician'],['Plumbing'],['Road / Tree Work']].map(p=>`<div class="row"><span class="bd" style="width:32px;height:32px;background:var(--grayt);color:var(--gray)"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M15.6 7.4a3.6 3.6 0 0 0-4.8 4.4l-6.2 6.2 2 2 6.2-6.2a3.6 3.6 0 0 0 4.4-4.8l-2.2 2.2-1.6-1.6z"/></svg></span><div style="flex:1"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink3)">${p[0]}</div><b style="font-size:13px;color:var(--ink3)">Add A Name</b></div><span class="act"><svg viewBox="0 0 24 24" stroke="#C7C0B0"><path d="M9 5l7 7-7 7"/></svg></span></div>`).join('')}</div></div>
+<div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:9px"><span class="sec" style="flex:1">Maintenance Reminders</span>${addBtn('Add Reminder')}</div>
+${[['Tesla — Change Tires','Due now','red'],['Boat — Dewinterize &amp; Service','Due now','red'],['Water Filter (Sink)','Every 6 mo · Ryan','red'],['Well Sediment Filter','Every 6 mo','red'],['AC Filters','1st of month · Ryan','gold'],['Truck — Oil Change','Every 5k mi','gray']].map(r=>`<div class="row"><span style="width:8px;height:8px;border-radius:50%;flex:none;background:${r[2]==='red'?'var(--red)':r[2]==='gold'?'var(--gold)':'#C7C0B0'}"></span><div style="flex:1"><b style="font-size:12.5px">${r[0]}</b><div class="muted" style="font-size:10px">${r[1]}</div></div>${ED}</div>`).join('')}
+<div class="note"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" stroke="#9A958B" stroke-width="2" style="flex:none"><path d="M6.5 17.5c1-1 1.5-2.5 1.5-5a4 4 0 0 1 8 0c0 2.5.5 4 1.5 5zM10 20.5a2 2 0 0 0 4 0"/></svg><span>Adding a reminder here also pushes it to the main <b>Reminders</b> list.</span></div></div></div>`;
+
+/* ---------- REMOTES ---------- */
+SCR.remotes=()=>title('Remotes')+`
+<div class="card"><div class="in" style="text-align:center">
+<div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px"><span class="chip" style="background:var(--clayt);border:1.5px solid var(--clay);color:var(--clayd)">Roku</span><span class="chip" style="border:1.5px solid var(--border);color:var(--ink3)">Samsung</span></div>
+<div style="display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">${['Living Room','Boys Room','Master','Patio'].map((t,i)=>`<span class="chip" style="font-size:11px;${i===0?'background:var(--clayt);border:1.5px solid var(--clay);color:var(--clayd)':'border:1.5px solid var(--border);color:var(--ink2)'}">${t}</span>`).join('')}</div>
+<div style="max-width:300px;margin:0 auto;background:linear-gradient(180deg,#8a6840,#674b2a);border:2px solid #43301a;border-radius:32px;padding:24px 22px">
+ <div style="display:flex;justify-content:space-between;margin-bottom:18px">${[['⏻','#9c5b4a'],['🏠','#5b6b4a'],['↩','#5b6b4a']].map(b=>`<span style="width:40px;height:40px;border-radius:50%;background:${b[1]};border:1px solid rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;color:#F4EFE6;font-size:15px">${b[0]}</span>`).join('')}</div>
+ <div style="position:relative;width:160px;height:160px;border-radius:50%;background:#EFE6D2;border:1px solid #BBA77E;margin:0 auto 18px">
+  ${[['top:12px;left:50%;transform:translateX(-50%)','M6 15l6-6 6 6'],['bottom:12px;left:50%;transform:translateX(-50%)','M6 9l6 6 6-6'],['left:12px;top:50%;transform:translateY(-50%)','M15 6l-6 6 6 6'],['right:12px;top:50%;transform:translateY(-50%)','M9 6l6 6-6 6']].map(a=>`<span style="position:absolute;${a[0]}"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" stroke="#4A4036" stroke-width="2.2"><path d="${a[1]}"/></svg></span>`).join('')}
+  <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:50%;background:#6E8B9A;border:3px solid #EFE6D2;display:flex;align-items:center;justify-content:center;color:#FAF8F2;font-family:'Roboto Slab',serif;font-weight:700;font-size:16px">OK</span>
+ </div>
+ <div style="display:flex;justify-content:space-between;margin-bottom:16px">${[['🔉','Vol'],['🔇','Mute'],['📺','Input'],['🔊','Vol']].map(b=>`<span style="width:42px;height:42px;border-radius:11px;background:rgba(239,230,210,.16);border:1px solid rgba(239,230,210,.25);display:flex;align-items:center;justify-content:center;color:#F4EFE6;font-size:15px">${b[0]}</span>`).join('')}</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px">${['NETFLIX','YOUTUBE','PRIME VIDEO','HULU'].map(a=>`<span style="height:36px;border-radius:9px;background:#C6D2B4;border:1px solid #A6B98C;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#4E5B3C">${a}</span>`).join('')}</div>
+ <div style="text-align:center;font-family:'Roboto Slab',serif;font-size:9px;letter-spacing:.3em;color:rgba(245,239,225,.5)">NEELYBOT · LOGO HERE</div>
+</div></div></div>`;
+
+/* ---------- IMPORTANT INFO ---------- */
+SCR.importantinfo=()=>title('Important Info','placement TBD')+`<div class="card"><div class="in" style="display:flex;justify-content:flex-end">${addBtn('Edit')}</div></div>
+<div class="grid2">${[['Contacts','Family, Friends & Numbers','contacts'],['Health & Medical','Allergies, Meds, Doctors','health'],['Home & Accounts','Wifi, Utilities, Services','homeacc'],['Pets & Animals','Vet, Meds, Care','pets'],['School & Activities','Schools, Coaches','school'],['Important Dates','Birthdays & Anniversaries','dates']].map(t=>`<div class="tile" ${t[2]?`onclick="go('${t[2]}')" style="cursor:pointer"`:''}><span class="bdc" style="width:38px;height:38px;background:var(--bluet);color:var(--blued)"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="9" r="3.5"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0"/></svg></span><div style="min-width:0"><div class="tn" style="font-size:14px">${t[0]}</div><div class="muted" style="font-size:10.5px;margin-top:2px">${t[1]}</div></div><span class="act" style="margin-left:auto;color:#C7C0B0"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></div>`).join('')}</div>`;
+
+/* ---------- EMERGENCY ---------- */
+SCR.emergency=()=>title('Emergency')+`<div class="card"><div class="in" style="display:flex;align-items:center;gap:14px;background:var(--redt);border:none;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:9px;height:48px;padding:0 22px;border-radius:12px;background:#B5403A;color:#FAF8F2;font-size:16px;font-weight:800">${call('#FAF8F2')}Call 911</span><div><div style="font-size:9.5px;font-weight:700;text-transform:uppercase;color:var(--red)">Read This To 911</div><b class="s" style="font-size:15px">2336 Ranch Road 963</b><div class="muted" style="font-size:12px">Burnet, TX 78611</div></div></div></div>
+<div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:9px"><span class="lbl" style="margin:0;flex:1">Emergency Contacts</span>${addBtn()}</div>${searchBox('Search Emergency Contacts')}<div style="height:8px"></div>
+${[['Burnet County Sheriff','Non-Emergency · (512) 756-8080'],['Burnet Fire Dept','(512) 756-5911'],['Poison Control','1-800-222-1222'],['After-Hours Emergency Vet','Highland Lakes · (830) 693-5438'],['Bluebonnet Vet','Regular Vet · (512) 756-7387']].map(c=>`<div class="row"><div style="flex:1"><b style="font-size:12.5px">${c[0]}</b><div class="muted" style="font-size:10px">${c[1]}</div></div><span class="bdc" style="width:32px;height:32px;background:var(--sage);color:#fff">${call('#FAF8F2')}</span>${VED}</div>`).join('')}</div></div>
+<div class="card"><div class="in"><div class="lbl">Family Critical Info</div><div class="grid2">${[['Amber',C.amber,'None Known','None'],['Ryan',C.ryan,'Penicillin, Amoxicillin','None'],['Caden',C.caden,'Peanuts','EpiPen'],['Gavin',C.gavin,'None Known','None']].map(p=>`<div class="tile" style="display:block"><div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">${av(p[0][0],p[1],24)}<b class="s" style="font-size:13.5px">${p[0]}</b></div><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px"><span class="muted">Allergy</span><b style="color:${p[2]==='None Known'?'var(--ink)':'var(--red)'}">${p[2]}</b></div><div style="display:flex;justify-content:space-between;font-size:11.5px"><span class="muted">Medication</span><b style="color:${p[3]==='None'?'var(--ink)':'var(--red)'}">${p[3]}</b></div></div>`).join('')}</div></div></div>`;
+
+/* ---------- CONTACTS ---------- */
+SCR.contacts=()=>title('Contacts')+`<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="lbl" style="margin:0;flex:1">All Contacts</div>${addBtn()}</div>${searchBox('Search Contacts')}</div></div>
+<div class="card"><div class="in"><div class="gl first">Family</div>
+${[['Glenn Neely','"Papa"','#9C6B57',1],['Ryan Neely','"Dad"',C.ryan,0],['Amber Neely','"Mom"',C.amber,0]].map(c=>`<div class="row">${av(c[0].split(' ').map(w=>w[0]).join(''),c[2],36)}<div style="flex:1"><b style="font-size:13px">${c[0]}</b><div class="muted" style="font-size:11px">${c[1]}</div></div>${c[3]?'<span class="chip" style="color:var(--red);background:var(--redt);border:1px solid #DEB6A9;font-size:9px">★ Emergency</span>':''}${VED}</div>`).join('')}
+<div class="gl">Friends</div>
+${[['Brandon Rende','"Bubba"',C.gavin],['Conner Reiss','Friend',C.caden]].map(c=>`<div class="row">${av(c[0].split(' ').map(w=>w[0]).join(''),c[2],36)}<div style="flex:1"><b style="font-size:13px">${c[0]}</b><div class="muted" style="font-size:11px">${c[1]}</div></div>${VED}</div>`).join('')}
+<div class="note"><span>Only names &amp; nicknames show on the wall. Deleting needs the Hub Code. Toggle "Emergency" to also list someone on the Emergency page.</span></div></div></div>`;
+
+/* ---------- HOME & ACCOUNTS ---------- */
+SCR.homeacc=()=>title('Home & Accounts')+`<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="lbl" style="margin:0;flex:1">Accounts</div>${addBtn()}</div>${searchBox('Search Accounts')}</div></div>
+<div class="card"><div class="in"><div class="gl first">Utilities</div>
+${[['Electric','Pedernales'],['Trash','Trash Panda'],['Internet','Starlink'],['Phone','AT&amp;T · $352'],['Auto Insurance','Geico']].map(a=>`<div class="row"><span class="bd" style="width:32px;height:32px;background:var(--goldt);color:var(--goldd)"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span><div style="flex:1"><b style="font-size:13px">${a[0]}</b><div class="muted" style="font-size:10px">${a[1]}</div></div>${VED}</div>`).join('')}
+</div></div>`;
+
+/* ---------- PETS ---------- */
+SCR.pets=()=>title('Pets & Animals')+`<div class="card"><div class="in" style="display:flex;justify-content:flex-end">${addBtn()}</div></div>
+<div class="card"><div class="in">
+${[['Dogs',[['Murphy','Labradoodle · M · Born Jul 2022','Trio · 1st'],['Sammi','Labradoodle · F · Born Oct 2020','Trio · 1st']]],['Highland Cattle',[['Annie','Cow · Silver · Chondro Negative','Dewormer · Dec 1'],['Milton','Bull · Silver · Dewormer · Fly · Vax','Set Up']]],['Goats',[['Greg','Goat · M · Born 2026',''],['Meg','Goat · F · Born 2026','']]],['Cat',[['Harley','Indoor Cat · Born Jul 2025','']]]].map(g=>`<div class="gl ${g[0]==='Dogs'?'first':''}">${g[0]}</div>${g[1].map(a=>`<div class="row"><span class="bdc" style="width:34px;height:34px;background:var(--beiget);color:var(--beige)"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path d="M8.5 9.5C6 8.4 3.4 8.4 2 10M15.5 9.5C18 8.4 20.6 8.4 22 10"/><path d="M8 10.5C8 7.4 9.8 6 12 6s4 1.4 4 4.5"/></svg></span><div style="flex:1"><b style="font-size:13px">${a[0]}</b><div class="muted" style="font-size:10.5px">${a[1]}</div></div>${a[2]?`<span class="chip" style="font-size:9px;${a[2].includes('Trio')?'color:var(--blued);background:var(--bluet)':'color:var(--goldd);background:var(--goldt)'}">${a[2]}</span>`:''}${ED}</div>`).join('')}`).join('')}
+</div></div>
+<div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:9px"><span class="sec" style="flex:1">Pet Reminders</span>${addBtn('Add Reminder')}</div>
+${[['Simparica Trio — Murphy &amp; Sammi','Monthly · 1st','gold'],['Dewormer — Annie','Every 6 mo · Dec 1','gold'],['Milton — Dewormer, Fly &amp; Vaccines','Set Up Schedule','gray'],['Mineral Feed — Cows &amp; Goats','Nightly · Gavin','sage']].map(r=>`<div class="row"><span style="width:8px;height:8px;border-radius:50%;flex:none;background:${r[2]==='gold'?'var(--gold)':r[2]==='sage'?'var(--sage)':'#C7C0B0'}"></span><div style="flex:1"><b style="font-size:12.5px">${r[0]}</b><div class="muted" style="font-size:10px">${r[1]}</div></div>${ED}</div>`).join('')}
+<div class="note"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" stroke="#9A958B" stroke-width="2" style="flex:none"><path d="M6.5 17.5c1-1 1.5-2.5 1.5-5a4 4 0 0 1 8 0c0 2.5.5 4 1.5 5zM10 20.5a2 2 0 0 0 4 0"/></svg><span>Adding a reminder here also pushes it to the main <b>Reminders</b> list.</span></div></div></div>`;
+
+/* ---------- SMART HOME ---------- */
+SCR.smarthome=()=>title('Smart Home')+`
+<div class="card"><div class="in"><div class="lbl">Cameras · Blink</div><div class="grid2" style="grid-template-columns:repeat(4,1fr)">${['Front Gate','Barn','Driveway','Back Porch'].map(c=>`<div class="cam"><span class="live"><span style="width:5px;height:5px;border-radius:50%;background:#7FB069"></span>LIVE</span><span class="camname">${c}</span></div>`).join('')}</div></div></div>
+<div class="card"><div class="in"><div class="lbl">Light Controls</div><div class="grid2">${[['Kitchen Lights',1],['Living Room',0],['Porch Lights',1],['Barn Lights',0],['Driveway Lights',0],['Coop Light',1]].map(l=>`<div class="tile"><span class="bd" style="width:32px;height:32px;background:${l[1]?'var(--goldt)':'var(--grayt)'};color:${l[1]?'var(--goldd)':'var(--gray)'}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><path d="M8.5 14.5a5 5 0 1 1 7 0c-.8.8-1.5 1.5-1.5 3h-4c0-1.5-.7-2.2-1.5-3Z"/><path d="M10 20.5h4"/></svg></span><div style="flex:1"><b style="font-size:12.5px">${l[0]}</b><div class="muted" style="font-size:10px">${l[1]?'On':'Off'}</div></div><span class="tog ${l[1]?'on':'off'}" style="background:${l[1]?'var(--blue)':'#E7E2D6'};${l[1]?'':'border:1px solid #C7C0B0'}"><span class="k"></span></span></div>`).join('')}</div></div></div>
+<div class="card"><div class="in"><div class="lbl">Indoor Controls</div><div class="grid2">${[['Thermostat','Not Set Up Yet','set'],['Starlink','Online · 152 Mbps','btn'],['PetNation Feeder','Next 5:00 PM','btn'],['Front Gate','Locked',1]].map(d=>`<div class="tile"><span class="bd" style="width:32px;height:32px;background:var(--bluet);color:var(--blued)"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="2"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg></span><div style="flex:1"><b style="font-size:12.5px">${d[0]}</b><div class="muted" style="font-size:10px">${d[1]}</div></div>${d[2]==='set'||d[2]==='btn'?`<span class="chip" style="color:var(--blued);background:var(--bluet)">${d[2]==='set'?'Set Up':'Open'}</span>`:`<span class="tog on" style="background:var(--blue)"><span class="k"></span></span>`}</div>`).join('')}</div></div></div>
+<div class="card"><div class="in"><div class="lbl">Outdoor Controls</div><div class="grid2">${[['Bee Hive Sprinklers','Off · Next 6:00 AM'],['Driveway Gate','Closed']].map(d=>`<div class="tile"><span class="bd" style="width:32px;height:32px;background:var(--saget);color:var(--saged)"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><path d="M12 3v6M12 9c-3 0-5 2-5 5a5 5 0 0 0 10 0c0-3-2-5-5-5Z"/></svg></span><div style="flex:1"><b style="font-size:12.5px">${d[0]}</b><div class="muted" style="font-size:10px">${d[1]}</div></div><span class="tog off" style="background:#E7E2D6;border:1px solid #C7C0B0"><span class="k"></span></span></div>`).join('')}</div>
+<div class="lbl" style="margin-top:14px">Scenes</div><div style="display:flex;gap:9px;flex-wrap:wrap">${['Good Morning','Good Night','Away','Movie Night'].map(s=>`<span style="height:36px;display:inline-flex;align-items:center;padding:0 15px;border-radius:9px;border:1.5px solid #CBC8BD;font-size:12.5px;font-weight:700">${s}</span>`).join('')}</div></div></div>`;
+
+/* ---------- SCHOOL & ACTIVITIES ---------- */
+SCR.school=()=>title('School & Activities')+`
+<div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:9px"><span class="sec" style="flex:1">School</span>${addBtn()}</div>
+${[['Caden',C.caden,'Burnet Middle School','7th Grade'],['Gavin',C.gavin,'Burnet Middle School','6th Grade']].map(s=>`<div class="row">${av(s[0][0],s[1],32)}<div style="flex:1"><b style="font-size:13px">${s[2]}</b><div class="muted" style="font-size:10.5px">${s[0]} · ${s[3]}</div></div>${ED}</div>`).join('')}</div></div>
+<div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:9px"><span class="sec" style="flex:1">Activities &amp; Coaches</span>${addBtn()}</div>
+${[['Gavin',C.gavin,'Baseball','Canes Southwest'],['Caden',C.caden,'Travel Baseball','Team TBD']].map(a=>`<div class="row">${av(a[0][0],a[1],32)}<div style="flex:1"><b style="font-size:13px">${a[2]}</b><div class="muted" style="font-size:10.5px">${a[0]} · ${a[3]}</div></div>${VED}</div>`).join('')}</div></div>
+<div class="card"><div class="in"><div class="sec" style="margin-bottom:8px">Burnet CISD · 2026–27 Days Off</div>
+${[['Aug 12','First Day Of School'],['Sep 7','Labor Day'],['Nov 23–27','Thanksgiving Break'],['Dec 18','Early Release'],['Dec 21–Jan 1','Christmas Break'],['Mar 15–19','Spring Break'],['May 19','Early Release'],['May 21','Last Day Of School']].map(d=>`<div class="row"><span class="chip" style="font-size:9px;color:var(--blued);background:var(--bluet);min-width:80px;justify-content:center">${d[0]}</span><b style="font-size:12.5px">${d[1]}</b></div>`).join('')}
+<div class="note"><span>Pulled from the Burnet CISD calendar — these block the family Calendar as no-school days.</span></div></div></div>`;
+
+/* ---------- HEALTH & MEDICAL ---------- */
+SCR.health=()=>title('Health & Medical')+`
+${[['Amber',C.amber,'None','Imuran','None'],['Ryan',C.ryan,'None','Penicillin, Amoxicillin','Neoprene'],['Caden',C.caden,'Peanuts (carries EpiPen)','None','None'],['Gavin',C.gavin,'None','None','None']].map(p=>`<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">${av(p[0][0],p[1],30)}<b class="s" style="flex:1;font-size:15px">${p[0]}</b><span class="act edit"><svg viewBox="0 0 24 24"><path d="M5 19h3l9.5-9.5-3-3L5 16zM14.5 6.5l3 3"/></svg></span></div>
+${[['Food Allergies',p[2]],['Medication Allergies',p[3]],['Other Allergies',p[4]],['Daily Medications','—'],['Blood Type','—'],['Doctors','—'],['Conditions','None']].map(f=>`<div style="display:flex;justify-content:space-between;padding:7px 2px;border-bottom:1px solid var(--line);font-size:12px"><span class="muted">${f[0]}</span><b style="color:${['None','—'].includes(f[1])?'var(--ink3)':'var(--red)'}">${f[1]}</b></div>`).join('')}</div></div>`).join('')}`;
+
+/* ---------- IMPORTANT DATES ---------- */
+SCR.dates=()=>title('Important Dates')+`
+<div class="card"><div class="in" style="display:flex;justify-content:flex-end">${addBtn()}</div></div>
+<div class="card"><div class="in"><div class="lbl">Upcoming</div>
+${[['Jul 10',"Caden's Birthday",'Turns 13',C.caden],['Sep 5',"Gavin's Birthday",'Turns 12',C.gavin],['Sep 29','Anniversary','Ryan &amp; Amber · 14 Years','#B07A8C'],['Dec 5',"Amber's Birthday",'',C.amber],['Jan 31',"Ryan's Birthday",'',C.ryan]].map(d=>`<div class="row"><span class="bdc" style="width:38px;height:38px;background:${d[3]}22;color:${d[3]}"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M5 21h14v-7H5zM5 14c1.3 0 1.3-1.3 2.6-1.3S8.9 14 10.2 14s1.3-1.3 2.6-1.3S14.1 14 15.4 14s1.3-1.3 2.6-1.3M9 12V9M12 12V8M15 12V9"/></svg></span><div style="flex:1"><b style="font-size:13px">${d[1]}</b>${d[2]?`<div class="muted" style="font-size:10.5px">${d[2]}</div>`:''}</div><span class="chip" style="font-size:10px;color:var(--blued);background:var(--bluet)">${d[0]}</span>${ED}</div>`).join('')}
+<div class="note"><span>A big birthday takeover lights up the whole hub on each person's day. 🎉</span></div></div></div>`;
+
+/* ---------- PROJECTS DATA + DETAIL ---------- */
+const PROJECTS=[
+{name:'Change Headlight',status:'Due Now',color:'red',steps:[['Buy Replacement Bulb',1],['Remove Housing Clips',0],['Swap Bulb &amp; Test',0]]},
+{name:'Build The Goat Barn',status:'In Progress',color:'blue',steps:[['Pour Footings',1],['Frame The Walls',1],['Set Roof Trusses',1],['Metal Roofing',1],['Hang Gates',0],['Run Water Line',0],['Bedding &amp; Feeders',0],['Perimeter Fencing',0],['Final Walk-Through',0]]},
+{name:'Well House',status:'Planning',color:'gold',steps:[['Pick The Location',0],['Pour The Slab',0],['Frame &amp; Roof',0],['Insulate The Pump',0]]},
+{name:'Raised Garden Beds',status:'Done',color:'sage',steps:[['Build The Frames',1],['Fill With Soil',1],['Plant Seedlings',1],['Run Drip Line',1],['Mulch',1],['Add Trellis',1]]}
+];
+function showProjects(){document.getElementById('screens').innerHTML=SCR.projects();document.querySelector('.stage').scrollTop=0}
+function openProject(i){const p=PROJECTS[i];const done=p.steps.filter(s=>s[1]).length;const pct=Math.round(done/p.steps.length*100);const cc=p.color;const bar=cc==='gold'?'var(--gold)':cc==='sage'?'var(--sage)':cc==='red'?'var(--red)':'var(--blue)';const chip=cc==='red'?'color:var(--red);background:var(--redt)':cc==='blue'?'color:var(--blued);background:var(--bluet)':cc==='gold'?'color:var(--goldd);background:var(--goldt)':'color:var(--saged);background:var(--saget)';document.getElementById('screens').innerHTML=title('Home Projects')+`<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:9px"><span onclick="showProjects()" class="chip" style="border:1.5px solid var(--border);color:var(--ink2);cursor:pointer">‹ Back</span><b class="s" style="flex:1;font-size:16px">${p.name}</b><span class="chip" style="font-size:9px;${chip}">${p.status}</span></div><div class="track" style="margin-top:11px"><div class="fill" style="width:${pct}%;background:${bar}"></div></div><div class="muted" style="font-size:11px;margin-top:7px">${done} of ${p.steps.length} steps done · ${pct}%</div></div></div><div class="card"><div class="in"><div style="display:flex;align-items:center;margin-bottom:8px"><span class="lbl" style="margin:0;flex:1">Steps</span>${addBtn('Add Step')}</div>${p.steps.map(s=>`<div class="row"><span style="width:21px;height:21px;border-radius:6px;flex:none;${s[1]?'background:var(--sage);display:flex;align-items:center;justify-content:center':'border:2px solid #CBC8BD'}">${s[1]?'<svg class="ic" width="13" height="13" viewBox="0 0 24 24" stroke="#fff" stroke-width="3"><path d="M5 12l5 5 9-10"/></svg>':''}</span><b style="flex:1;font-size:13px;${s[1]?'color:var(--ink3);text-decoration:line-through':''}">${s[0]}</b>${ED}</div>`).join('')}<div class="note"><span>Check off as you go · drag to reorder (Monday.com-style).</span></div></div></div>`;document.querySelector('.stage').scrollTop=0}
+
+/* ---------- NAV ---------- */
+const NAV=[
+['home','Home','M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10M10 19.5v-5h4v5'],
+['calendar','Calendar','M3.5 5h17v15h-17zM3.5 9.5h17M8 3.5v3M16 3.5v3'],
+['chores','Chores','M5 4.5h14v16H5zM9 4.5a3 3 0 0 1 6 0M8.5 12.5l2 2 4-4.5'],
+['finance','Finance','M12 3v18M16 7.5c0-2-1.8-3-4-3s-4 1.2-4 3 1.8 2.5 4 3 4 1.2 4 3-1.8 3-4 3-4-1-4-3'],
+['shopping','Shopping','M3 4.5h2.2l2 11h9.8l1.8-8H7M9 19.3v.01M16.5 19.3v.01'],
+['reminders','Reminders','M6.5 17.5c1-1 1.5-2.5 1.5-5a4 4 0 0 1 8 0c0 2.5.5 4 1.5 5zM10 20.5a2 2 0 0 0 4 0'],
+['projects','Projects','M4 20h6v-4l8-8-2-2-8 8H4zM14 6l4 4'],
+['vault','Vault','M5 10.5h14v9H5zM8 10.5V8a4 4 0 0 1 8 0v2.5'],
+['settings','Settings','M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M18 6l-1.6 1.6M7.6 16.4 6 18'],
+['trips','Trips','M4 8h16v11H4zM9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2'],
+['photos','Photos','M3.5 5h17v14h-17zM9 10a1.6 1.6 0 1 0 0-.01M5 17.5l4.5-4.5 3 3 3.5-3 3.5 3.5'],
+['nowplaying','Music','M9 18V6.5l9-2v9M6.5 18a2.5 2.5 0 1 0 0-.01M15.5 15.5a2.5 2.5 0 1 0 0-.01'],
+['maintenance','Maintenance','M15.6 7.4a3.6 3.6 0 0 0-4.8 4.4l-6.2 6.2 2 2 6.2-6.2a3.6 3.6 0 0 0 4.4-4.8l-2.2 2.2-1.6-1.6z'],
+['importantinfo','Info','M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17M12 10.5v5.5M12 7.8h.01']
+];
+const rail=document.getElementById('rail');
+NAV.forEach(n=>{const d=document.createElement('div');d.className='rb';d.dataset.s=n[0];d.innerHTML=`<svg viewBox="0 0 24 24"><path d="${n[2]}"/></svg><span>${n[1]}</span>`;d.onclick=()=>go(n[0]);rail.appendChild(d)});
+function go(s){location.hash=s}
+const GATED={vault:'Password Vault',finance:'Finance'};
+let PIN='',PIN_CB=null;
+function paint(s){document.getElementById('screens').innerHTML=(SCR[s]||SCR.home)();document.querySelector('.stage').scrollTop=0}
+function render(){const s=(location.hash||'#home').slice(1);document.querySelectorAll('.rb').forEach(r=>r.classList.toggle('on',r.dataset.s===s));document.querySelector('.stage').scrollTop=0;if(GATED[s]){PIN='';PIN_CB=()=>paint(s);document.getElementById('screens').innerHTML=lockHTML(GATED[s])}else paint(s)}
+function pin(d){if(d==='del')PIN=PIN.slice(0,-1);else if(PIN.length<4)PIN+=d;document.querySelectorAll('#screens .pdot').forEach((el,i)=>{el.style.background=i<PIN.length?'#2A2620':'transparent'});if(PIN.length===4){const cb=PIN_CB;PIN_CB=null;setTimeout(()=>{if(cb)cb()},230)}}
+function lockHTML(label){return title(label||'Locked')+`<div class="card" style="max-width:360px;margin:6px auto"><div class="in" style="position:relative;overflow:hidden;text-align:center;padding:24px 20px"><svg viewBox="8 33 224 168" preserveAspectRatio="xMidYMid meet" style="position:absolute;left:50%;top:6%;transform:translateX(-50%);width:100%;opacity:.16;pointer-events:none"><g fill="none" stroke="#34505E" stroke-linecap="round" stroke-linejoin="round"><path stroke-width="2.6" d="M96,80 C74,82 50,86 30,80 C22,76 16,68 12,58 C18,68 26,84 50,94 C72,101 88,100 100,98 C101,92 99,85 96,80 Z"/><path stroke-width="2.6" d="M144,80 C166,82 190,86 210,80 C218,76 224,68 228,58 C222,68 214,84 190,94 C168,101 152,100 140,98 C139,92 141,85 144,80 Z"/><path stroke-width="1.6" d="M74,94 C72,58 96,46 120,46 C144,46 168,58 166,94"/><path stroke-width="1.7" d="M96,154 Q98,138 120,138 Q142,138 144,154 Q144,172 120,175 Q96,172 96,154 Z"/></g><g fill="#34505E"><circle cx="104" cy="116" r="2.3"/><circle cx="136" cy="116" r="2.3"/></g></svg><div style="position:relative"><div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px">Family Vault</div><div class="s" style="font-weight:700;font-size:22px;color:#2A2620;margin-bottom:18px">Enter the Hub Code</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:210px;margin:0 auto">${[1,2,3,4,5,6,7,8,9,'',0,'del'].map(k=>k===''?'<span></span>':`<span onclick="pin('${k}')" style="height:48px;border-radius:10px;background:#E8E6DF;border:1px solid #CBC8BD;display:flex;align-items:center;justify-content:center;font-family:'Roboto Slab',serif;font-size:19px;font-weight:700;cursor:pointer;user-select:none">${k==='del'?'⌫':k}</span>`).join('')}</div><div style="display:flex;gap:11px;justify-content:center;margin-top:18px">${[0,1,2,3].map(()=>'<span class="pdot" style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2620;background:transparent"></span>').join('')}</div><div class="muted" style="font-size:10.5px;margin-top:16px">🔒 This page is locked. (Demo: any 4 digits opens it.)</div></div></div></div>`}
+window.addEventListener('hashchange',render);
+
+function clock(){const d=new Date();let h=d.getHours();const m=String(d.getMinutes()).padStart(2,'0');const ap=h>=12?'PM':'AM';let gr="Mornin', Y'all";if(h>=12&&h<17)gr="Afternoon, Y'all";else if(h>=17)gr="Evenin', Y'all";h=h%12||12;document.getElementById('clock').innerHTML=h+':'+m+'<small> '+ap+'</small>';document.getElementById('greet').textContent=gr;document.getElementById('date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+" · Gracie's Grove";}
+clock();setInterval(clock,10000);render();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+</body>
+</html>

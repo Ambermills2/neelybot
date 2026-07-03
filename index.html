@@ -771,7 +771,7 @@ function fbSubscribe(){
   fbUnsub=fbDoc.onSnapshot(function(snap){
     if(snap.metadata.hasPendingWrites)return;
     if(_dirty)return;
-    if(snap.exists){var d=snap.data();if(d&&d.stateJson){try{applyState(JSON.parse(d.stateJson));}catch(e){console.warn('[sync] parse',e);}repaintCurrent();}}
+    if(snap.exists){var d=snap.data();if(d&&d.stateJson){try{applyState(JSON.parse(d.stateJson));saveLocal();}catch(e){console.warn('[sync] parse',e);}repaintCurrent();}}
     else if(!_seeded){_seeded=true;fbSaveNow();}
   },function(e){console.warn('[sync] snapshot',e);});
 }
@@ -800,7 +800,9 @@ function applyState(st){
   }catch(e){console.warn('[sync] apply',e);}
   _hydrating=false;
 }
-function fbSaveSoon(){if(_hydrating||!fbReady||!fbUser||!fbDoc)return;_dirty=true;if(_saveT)clearTimeout(_saveT);_saveT=setTimeout(fbSaveNow,900);}
+function saveLocal(){if(_hydrating)return;try{localStorage.setItem('neelybot_state',JSON.stringify(snapshotState()));}catch(e){}}
+function loadLocal(){try{var s=localStorage.getItem('neelybot_state');if(s){applyState(JSON.parse(s));}}catch(e){console.warn('[local] load',e);}}
+function fbSaveSoon(){saveLocal();if(_hydrating||!fbReady||!fbUser||!fbDoc)return;_dirty=true;if(_saveT)clearTimeout(_saveT);_saveT=setTimeout(fbSaveNow,900);}
 function fbSaveNow(){
   if(!fbReady||!fbUser||!fbDoc)return;if(_saveT){clearTimeout(_saveT);_saveT=null;}
   try{fbDoc.set({stateJson:JSON.stringify(snapshotState()),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:(fbUser.email||fbUser.displayName||'family')},{merge:true}).then(function(){if(!_saveT)_dirty=false;}).catch(function(e){console.warn('[sync] save',e);});}catch(e){console.warn('[sync] save',e);}
@@ -816,7 +818,7 @@ function fbSettingsCard(){
   else{status='Not signed in · changes stay on this device only';btn='<button onclick="fbSignIn()" style="height:30px;padding:0 13px;border-radius:8px;border:none;background:var(--blued);color:#fff;font-size:11px;font-weight:700;cursor:pointer">Sign In</button>';}
   return '<div class="card"><div class="in" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="bd" style="width:30px;height:30px;background:'+(fbUser?'var(--saget);color:var(--saged)':'var(--goldt);color:var(--goldd)')+'"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 12a8 8 0 0 1 14-5M20 12a8 8 0 0 1-14 5M18 4v3h-3M6 20v-3h3"/></svg></span><div style="flex:1;min-width:130px"><b style="font-size:12.5px">Family Sync</b><div class="muted" style="font-size:10px">'+status+'</div></div>'+btn+'</div></div>';
 }
-clock();setInterval(clock,10000);render();fetchWeather();setInterval(fetchWeather,1800000);loadPhotoManifest();fbInit();
+loadLocal();clock();setInterval(clock,10000);render();fetchWeather();setInterval(fetchWeather,1800000);loadPhotoManifest();fbInit();
 </script>
 <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
 <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>

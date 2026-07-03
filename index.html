@@ -771,7 +771,7 @@ function fbSubscribe(){
   fbUnsub=fbDoc.onSnapshot(function(snap){
     if(snap.metadata.hasPendingWrites)return;
     if(_dirty)return;
-    if(snap.exists){var d=snap.data();if(d&&d.stateJson){try{applyState(JSON.parse(d.stateJson));saveLocal();}catch(e){console.warn('[sync] parse',e);}repaintCurrent();}}
+    if(snap.exists){var d=snap.data();if(d&&d.stateJson){try{applyState(JSON.parse(d.stateJson));saveLocal();}catch(e){console.warn('[sync] parse',e);}_hydrating=true;repaintCurrent();_hydrating=false;}}
     else if(!_seeded){_seeded=true;fbSaveNow();}
   },function(e){console.warn('[sync] snapshot',e);});
 }

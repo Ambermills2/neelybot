@@ -1,6 +1,6 @@
 // NeelyBot service worker — network-first so the wall always shows fresh content,
 // with an offline cache fallback so the hub still loads if Wi-Fi drops.
-const CACHE = 'neelybot-e276cef7';
+const CACHE = 'neelybot-e48f4864';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './logo.png'];
 // Live data endpoints — always hit the network, never cache (so weather is fresh, and stale
 // values never get pinned). They fail cleanly offline; the app keeps its last in-memory reading.

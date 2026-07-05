@@ -866,7 +866,11 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').then(function(reg){
-      setInterval(function(){reg.update().catch(function(){})},1800000);
+      var check=function(){reg.update().catch(function(){})};
+      check();
+      setInterval(check,120000);
+      document.addEventListener('visibilitychange',function(){if(!document.hidden)check()});
+      window.addEventListener('focus',check);
     }).catch(function(){});
   });
 }

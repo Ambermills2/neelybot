@@ -739,7 +739,7 @@ let WTOWNS=['Burnet','Dripping Springs','Leander','Zorn','Taylor','Hernando Beac
 let WXDATA={},WXSUN=null,WXCOORDS={'Burnet':[30.7568,-98.2287],'Dripping Springs':[30.1902,-98.0867],'Leander':[30.5788,-97.8531],'Zorn':[29.7061,-97.9353],'Taylor':[30.5705,-97.4092],'Hernando Beach':[28.4736,-82.6598]};
 const WX_ACCU={'Burnet':'https://www.accuweather.com/en/us/burnet/78611/weather-forecast/335754','Dripping Springs':'https://www.accuweather.com/en/us/dripping-springs/78620/weather-forecast/346080','Leander':'https://www.accuweather.com/en/us/leander/78641/weather-forecast/2110257','Zorn':'https://www.accuweather.com/en/us/zorn/78666/weather-forecast/2144495','Taylor':'https://www.accuweather.com/en/us/taylor/76574/weather-forecast/341050','Hernando Beach':'https://www.accuweather.com/en/us/hernando-beach/34607/weather-forecast/2258022'};
 function accuUrl(t){return WX_ACCU[t]||('https://www.accuweather.com/en/search-locations?query='+encodeURIComponent(t+', TX'))}
-let ACCOUNTS=['Spotify','Apple Music','Blink Cameras','Starlink','Roku · 3 TVs','Samsung TV','Tesla','SmartThings','Google Calendar','PetNation Feeder'];
+let ACCOUNTS=['Blink Cameras','Starlink','Roku · 3 TVs','Samsung TV','Tesla','SmartThings','Google Calendar','PetNation Feeder'];
 const FAMILY=[['Amber',C.amber,'Mom','Dec 5'],['Ryan',C.ryan,'Dad','Jan 31'],['Caden',C.caden,'Son','Jul 10'],['Gavin',C.gavin,'Son','Sep 5']];
 const GROVE=['home'];
 function syncHeader(s){var isG=GROVE.indexOf(s)>=0;var h=document.querySelector('.hdr');if(h)h.style.display=isG?'none':'';var w=document.querySelector('.wrap');if(w)w.style.paddingBottom=isG?'16px':'40px';}

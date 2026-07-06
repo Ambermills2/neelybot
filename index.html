@@ -163,6 +163,115 @@ details[open]>summary .ic{transform:rotate(180deg)}
   .title{font-size:19px}
   .card .in{padding:13px}
 }
+
+/* ============================================================
+   GROVE OS — dashboard screens (scoped under .gos so the rest
+   of the app is untouched). Pixel-matches the approved mockup.
+   ============================================================ */
+:root{
+  --surface-sunk:var(--sunk);--ink-2:var(--ink2);--ink-3:var(--ink3);
+  --line-strong:var(--frame);
+  --accent-sage:var(--sage);--accent-sage-tint:var(--saget);
+  --accent-clay:var(--clay);--accent-clay-tint:var(--clayt);
+  --st-over:var(--red);--st-over-bg:var(--redt);
+  --st-warn:var(--gold);--st-warn-bg:var(--goldt);
+  --st-good:var(--saged);--st-good-bg:var(--saget);
+  --p-amber:var(--amber);--p-ryan:var(--ryan);--p-caden:var(--caden);--p-gavin:var(--gavin);
+  --r-tile:18px;--r-inner:12px;--r-chip:999px;
+  --shadow-tile:0 2px 10px rgba(44,40,35,.06);
+  --font-display:'Roboto Slab',Georgia,serif;
+  --font-body:'Source Sans 3',system-ui,sans-serif;
+}
+.gos{font-family:var(--font-body);color:var(--ink);min-height:calc(100vh - 56px)}
+.gos.gos-home{display:grid;grid-template-columns:1.55fr 1fr;grid-template-rows:auto 1fr auto auto;gap:13px}
+.gos .hero-band{grid-column:1 / -1;display:grid;grid-template-columns:1.55fr 1fr;gap:14px}
+.gos .tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-tile);box-shadow:var(--shadow-tile);padding:16px 18px;min-width:0;display:block;align-items:stretch;text-align:left}
+.gos .eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--ink-3)}
+/* clock hero */
+.gos .t-clock{display:flex;flex-direction:column;justify-content:center;padding:14px 22px}
+.gos .loc-row{display:flex;align-items:center;gap:8px}
+.gos .loc-row .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-sage);box-shadow:0 0 6px rgba(124,134,102,.5)}
+.gos .greeting{font-family:var(--font-display);font-size:34px;font-weight:700;line-height:1;margin:9px 0 3px;color:var(--ink)}
+.gos .greet-date{font-size:13.5px;color:var(--ink-2)}
+.gos .clock-div{height:1px;background:var(--line);margin:12px 0 8px}
+.gos .clock-line{display:flex;align-items:baseline;gap:10px}
+.gos .clock{font-family:var(--font-display);font-size:74px;font-weight:700;line-height:.82;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.gos .ampm{font-size:22px;font-weight:600;color:var(--ink-3);letter-spacing:.02em}
+/* weather */
+.gos .t-weather{display:flex;flex-direction:column;justify-content:center}
+.gos .wx-main{display:flex;align-items:center;gap:14px}
+.gos .wx-sun{width:52px;height:52px;flex:0 0 52px}
+.gos .wx-temp{font-family:var(--font-display);font-size:52px;font-weight:700;line-height:.9;color:var(--ink);font-variant-numeric:tabular-nums}
+.gos .wx-cond{font-size:12.5px;color:var(--ink-2);margin-top:3px}
+.gos .wx-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+.gos .wx-town{display:flex;flex-direction:column;gap:1px;text-align:left}
+.gos .wx-town .tt{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.gos .wx-town .tn{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* today */
+.gos .t-today{grid-column:1;grid-row:2;display:flex;flex-direction:column;overflow:hidden}
+.gos .today-list{display:flex;flex-direction:column;margin-top:10px;flex:1;overflow-y:auto}
+.gos .ev-row{display:flex;align-items:center;gap:13px;padding:11px 0;border-top:1px solid var(--line)}
+.gos .ev-row:first-child{border-top:none}
+.gos .ev-tick{width:3px;align-self:stretch;border-radius:3px;flex:0 0 3px;min-height:34px}
+.gos .ev-time{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--ink);width:62px;flex:0 0 62px;font-variant-numeric:tabular-nums}
+.gos .ev-body{min-width:0}
+.gos .ev-title{font-size:15px;font-weight:600;color:var(--ink)}
+.gos .ev-sub{font-size:13px;color:var(--ink-2);margin-top:1px}
+.gos .bday-nudge{margin-top:12px;display:flex;align-items:center;gap:9px;background:var(--accent-clay-tint);border-radius:var(--r-inner);padding:9px 13px;font-size:13px;color:var(--clayd);font-weight:600}
+.gos .bday-nudge svg{width:17px;height:17px;stroke:var(--accent-clay);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:0 0 17px}
+/* kids banking */
+.gos .t-bank{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:12px}
+.gos .bank-kid{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-tile);box-shadow:var(--shadow-tile);padding:14px 16px;flex:1;display:flex;flex-direction:column;cursor:pointer}
+.gos .bank-head{display:flex;align-items:center;gap:10px}
+.gos .avatar{width:38px;height:38px;flex:0 0 38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:16px;color:#fff}
+.gos .bank-who{display:flex;flex-direction:column;line-height:1.15}
+.gos .bank-name{font-size:14px;font-weight:700;color:var(--ink)}
+.gos .bank-grade{font-size:11.5px;color:var(--ink-3)}
+.gos .bank-bal{margin-left:auto;font-family:var(--font-display);font-size:38px;font-weight:700;color:var(--ink);line-height:.9;font-variant-numeric:tabular-nums}
+.gos .bank-bal .cents{font-size:19px;color:var(--ink-3);font-weight:700}
+.gos .bank-foot{display:flex;align-items:center;gap:10px;margin-top:11px}
+.gos .chore-prog{flex:1}
+.gos .chore-lab{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-bottom:5px}
+.gos .chore-lab b{color:var(--ink);font-weight:700}
+.gos .track{height:7px;border-radius:999px;background:var(--surface-sunk);overflow:hidden}
+.gos .fill{height:100%;border-radius:999px;background:var(--accent-sage)}
+.gos .pill{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.gos .pill-pending{background:var(--accent-sage-tint);color:var(--saged)}
+/* reminders */
+.gos .t-remind{grid-column:2;grid-row:3;display:flex;flex-direction:column}
+.gos .rem-list{margin-top:9px;display:flex;flex-direction:column}
+.gos .rem-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+.gos .rem-row:first-child{border-top:none}
+.gos .rem-dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
+.gos .rem-mid{min-width:0;flex:1}
+.gos .rem-title{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gos .rem-meta{font-size:12px;color:var(--ink-3);margin-top:1px}
+.gos .due-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.gos .due-clay{background:var(--st-warn-bg);color:var(--goldd)}
+.gos .due-muted{background:var(--surface-sunk);color:var(--ink-3)}
+/* this week */
+.gos .t-week{grid-column:1;grid-row:3;display:flex;flex-direction:column}
+.gos .week-grid{display:flex;gap:8px;margin-top:10px;flex:1}
+.gos .week-day{flex:1;background:var(--surface-sunk);border-radius:var(--r-inner);padding:9px 8px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.gos .week-day.hot{background:var(--accent-clay-tint)}
+.gos .week-dow{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:700}
+.gos .week-num{font-family:var(--font-display);font-size:20px;font-weight:600;color:var(--ink);line-height:.9;font-variant-numeric:tabular-nums}
+.gos .week-day.hot .week-num{color:var(--accent-clay)}
+.gos .week-ev{font-size:11px;color:var(--ink-2);line-height:1.25;display:flex;align-items:center;gap:5px;margin-top:auto}
+.gos .week-ev .pd{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+/* quick open */
+.gos .t-quick{grid-column:1 / -1;grid-row:4;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.gos .qbtn{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-inner);box-shadow:var(--shadow-tile);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:10px 4px;cursor:pointer;color:var(--ink)}
+.gos .qbtn svg{width:22px;height:22px;stroke:var(--ink-2);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.gos .qbtn.emergency svg{stroke:var(--accent-clay)}
+.gos .qbtn .ql{font-size:12px;font-weight:600}
+@media (max-width:640px){
+  .gos{height:auto}
+  .gos.gos-home{grid-template-columns:1fr;grid-auto-rows:auto}
+  .gos .hero-band{grid-template-columns:1fr}
+  .gos .t-today,.gos .t-bank,.gos .t-remind,.gos .t-week,.gos .t-quick{grid-column:1;grid-row:auto}
+  .gos .clock{font-size:64px}.gos .greeting{font-size:26px}
+}
 </style>
 </head>
 <body>
@@ -228,26 +337,75 @@ function title(t,tag){return `<div class="title"><span>${t}</span>${tag?`<span c
 const SCR={};
 
 /* ---------- HOME ---------- */
-SCR.home=()=>title('Home')+fbSyncCard()+`
-${birthdayBanner()}<div class="card"><div class="in"><div class="lbl">Weather</div><div id="wxStrip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:9px">${wxStripHTML()}</div></div></div>
-<div class="grid2">
- <div class="card"><div class="in" onclick="go('calendar')" style="cursor:pointer"><div class="lbl">Today</div>
-  ${(function(){var t=todayYMD();var evs=EVENTS.filter(function(e){return e.date===t;}).sort(function(a,b){return String(a.time||'').localeCompare(String(b.time||''));});if(!evs.length)return '<div class="muted" style="font-size:11.5px;padding:4px 0">Nothing scheduled today.</div>';return evs.map(function(e){var col=PCOL[(e.who||['Everyone'])[0]]||'#B7B3AA';return '<div class="row" style="border:none;padding:6px 0;cursor:pointer"><span style="width:4px;height:28px;border-radius:3px;background:'+col+'"></span><div style="flex:1"><b style="font-size:13px">'+e.title+'</b><div class="muted" style="font-size:11px">'+((e.time?e.time+' · ':'')+(e.who||['Everyone']).join(', '))+'</div></div></div>';}).join('');})()} </div></div>
- <div class="card"><div class="in" onclick="go('calendar')" style="cursor:pointer"><div class="lbl">This Week</div>
-  ${(function(){var t=todayYMD();var dd=new Date();dd.setDate(dd.getDate()+7);var end=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];var evs=EVENTS.filter(function(e){return e.date&&e.date>t&&e.date<=end;}).sort(function(a,b){return a.date.localeCompare(b.date)||String(a.time||'').localeCompare(String(b.time||''));});if(!evs.length)return '<div class="muted" style="font-size:11.5px;padding:4px 0">Nothing this week.</div>';return evs.slice(0,5).map(function(e){var col=PCOL[(e.who||['Everyone'])[0]]||'#B7B3AA';var p=e.date.split('-');var dn=DOW[new Date(+p[0],+p[1]-1,+p[2]).getDay()];return '<div class="row" style="border:none;padding:6px 0;cursor:pointer"><span style="width:4px;height:28px;border-radius:3px;background:'+col+'"></span><div style="flex:1"><b style="font-size:13px">'+dn+' · '+e.title+'</b><div class="muted" style="font-size:11px">'+((e.time?e.time+' · ':'')+(e.who||['Everyone']).join(', '))+'</div></div></div>';}).join('');})()}
- </div></div>
-</div>
-<div class="grid2">
- <div class="card"><div class="in"><div class="lbl">Kids' Money</div>
-  ${['Caden','Gavin'].map(function(nm){var col=nm==='Caden'?C.caden:C.gavin;var bal=(KIDBAL[nm]?KIDBAL[nm].bal:0);var done=CHORES.filter(c=>c[0]===nm&&c[5]==='done').length,tot=CHORES.filter(c=>c[0]===nm).length;var pct=tot?Math.round(done/tot*100):0;return `<div onclick="go('finance')" style="display:flex;align-items:center;gap:11px;cursor:pointer;padding:6px 0">${av(nm[0],col,36)}<div style="flex:1;min-width:0"><b class="s" style="font-size:14px">${nm}</b><div style="display:flex;align-items:center;gap:7px;margin-top:5px"><span class="track" style="flex:1"><span class="fill" style="width:${pct}%;background:${col}"></span></span><span class="muted" style="font-size:10px;font-weight:700;flex:none">${done}/${tot} chores</span></div></div><div class="s" style="font-weight:800;font-size:25px;flex:none;line-height:1">$${bal.toFixed(0)}</div></div>`;}).join('')}
- </div></div>
- <div class="card"><div class="in" onclick="go('reminders')" style="cursor:pointer"><div class="lbl">Reminders</div>
-  ${(function(){var today=todayYMD();var due=REMINDERS.filter(function(r){return !r[3]||r[3]<=today;}).sort(function(a,b){var ad=a[3]||'',bd=b[3]||'';if(ad&&bd)return ad.localeCompare(bd);if(ad&&!bd)return -1;if(!ad&&bd)return 1;return 0;});var soon=REMINDERS.filter(function(r){return r[3]&&r[3]>today;}).sort(function(a,b){return a[3].localeCompare(b[3]);});var top=due.concat(soon).slice(0,4);if(!top.length)return '<div class="muted" style="font-size:11.5px;padding:4px 0">Nothing on the list 🎉</div>';return top.map(function(r){var du=daysUntil(r[3]);var isRed=!r[3]||du===null||du<=0;var label=!r[3]?'Due now':(du<0?'Overdue':du===0?'Due Today':du===1?'Due Tomorrow':fmtDue(r[3]));var who=r[2]&&r[2]!=='Anyone'?' · '+r[2]:'';return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px"><span style="width:8px;height:8px;border-radius:50%;flex:none;background:'+(isRed?'var(--red)':'var(--gold)')+'"></span><div style="flex:1;min-width:0"><b style="font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+r[0]+'</b></div><span class="muted" style="font-size:10.5px;font-weight:600;flex:none">'+label+who+'</span></div>';}).join('');})()}
- </div></div>
-</div>
-<div class="card"><div class="in"><div class="lbl">Quick Open</div>
- <div class="grid2" style="grid-template-columns:repeat(5,1fr)">${[['smarthome','Smart Home','M4 11.5 12 5l8 6.5M6.5 10.5v8.5h11v-8.5M12 19v-3.4','var(--saged)','var(--saget)'],['remotes','Remotes','M8 3h8a1.5 1.5 0 0 1 1.5 1.5v15A1.5 1.5 0 0 1 16 21H8a1.5 1.5 0 0 1-1.5-1.5v-15A1.5 1.5 0 0 1 8 3M12 6.5h.01M10 9.5h4M10 12h4','var(--clayd)','var(--clayt)'],['shopping','Shopping List','M3 4.5h2.2l2 11h9.8l1.8-8H7','var(--blued)','var(--bluet)'],['emergency','Emergency','M12 4 2.8 20h18.4zM12 10v4M12 17v.01','var(--red)','var(--redt)'],['kidsbank','Bank','M12 3v18M16 7.5c0-2-1.8-3-4-3s-4 1.2-4 3 1.8 2.5 4 3 4 1.2 4 3-1.8 3-4 3-4-1-4-3','var(--goldd)','var(--goldt)']].map(q=>`<div onclick="go('${q[0]}')" class="tile" style="cursor:pointer;flex-direction:column;text-align:center;gap:9px;padding:17px 8px"><span class="bdc" style="width:44px;height:44px;background:${q[4]};color:${q[3]}"><svg class="ic" width="23" height="23" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9"><path d="${q[2]}"/></svg></span><b style="font-size:12px">${q[1]}</b></div>`).join('')}</div>
-</div></div>`;
+SCR.home=function(){
+  var now=new Date();
+  var gr="Mornin', Y'all";{var _h=now.getHours();if(_h>=12&&_h<17)gr="Afternoon, Y'all";else if(_h>=17)gr="Evenin', Y'all";}
+  var greet=greetOverride||gr;
+  var dateLong=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  var ch=now.getHours()%12||12, cm=String(now.getMinutes()).padStart(2,'0'), cap=now.getHours()>=12?'PM':'AM';
+  var tstr=todayYMD();
+  /* today's events */
+  var evs=EVENTS.filter(function(e){return e.date===tstr;}).sort(function(a,b){return String(a.time||'').localeCompare(String(b.time||''));});
+  var todayList=evs.length?evs.map(function(e){var w=(e.who||['Everyone'])[0];var col=PCOL[w]||'var(--ink-3)';return '<div class="ev-row"><span class="ev-tick" style="background:'+col+'"></span><span class="ev-time">'+(e.time?escH(e.time):'All day')+'</span><div class="ev-body"><div class="ev-title">'+escH(e.title)+'</div><div class="ev-sub">'+escH((e.who||['Everyone']).join(', '))+'</div></div></div>';}).join(''):'<div class="muted" style="font-size:13px;padding:10px 0">Nothing scheduled today.</div>';
+  var bt=birthdayToday();
+  var bnudge=bt?'<div class="bday-nudge"><svg viewBox="0 0 24 24"><path d="M5 20h14v-6H5v6Z"/><path d="M4 14c1.2 0 1.2-1.2 2.4-1.2S7.6 14 8.8 14s1.2-1.2 2.4-1.2S12.4 14 13.6 14s1.2-1.2 2.4-1.2S17.2 14 18.4 14 20 12.8 20 12.8"/><path d="M9 9V6.5M12 9V6M15 9V6.5"/></svg><span>Today is '+escH(bt[0])+'’s birthday.</span></div>':'';
+  /* kids banking */
+  var bankHTML=['Caden','Gavin'].map(function(nm){
+    var col=nm==='Caden'?C.caden:C.gavin;
+    var bal=(KIDBAL[nm]?KIDBAL[nm].bal:0);
+    var sc=SCHOOLS.find(function(s){return s[0]===nm;});
+    var grade=sc?(sc[3].replace(' Grade','')+' · '+sc[2].replace(' School','')):'';
+    var tot=CHORES.filter(function(c){return c[0]===nm;}).length;
+    var done=CHORES.filter(function(c){return c[0]===nm&&c[5]==='done';}).length;
+    var pct=tot?Math.round(done/tot*100):0;if(pct<4)pct=4;
+    var pend=(typeof APPROVALS!=='undefined'?APPROVALS.filter(function(a){return a.who===nm;}).length:0);
+    var dollars=Math.floor(bal), cents=('0'+Math.round((bal-dollars)*100)).slice(-2);
+    return '<div class="bank-kid" onclick="go(\'finance\')"><div class="bank-head"><div class="avatar" style="background:'+col+'">'+nm[0]+'</div><div class="bank-who"><span class="bank-name">'+nm+'</span><span class="bank-grade">'+escH(grade)+'</span></div><div class="bank-bal">$'+dollars+'<span class="cents">.'+cents+'</span></div></div><div class="bank-foot"><div class="chore-prog"><div class="chore-lab"><span>Chores today</span><span><b>'+done+'</b>/'+tot+'</span></div><div class="track"><div class="fill" style="width:'+pct+'%"></div></div></div>'+(pend?'<span class="pill pill-pending">Pending</span>':'')+'</div></div>';
+  }).join('');
+  /* reminders */
+  var due=REMINDERS.filter(function(r){return !r[3]||r[3]<=tstr;}).sort(function(a,b){var ad=a[3]||'',bd=b[3]||'';if(ad&&bd)return ad.localeCompare(bd);if(ad&&!bd)return -1;if(!ad&&bd)return 1;return 0;});
+  var soon=REMINDERS.filter(function(r){return r[3]&&r[3]>tstr;}).sort(function(a,b){return a[3].localeCompare(b[3]);});
+  var topR=due.concat(soon).slice(0,4);
+  var remHTML=topR.length?topR.map(function(r){var du=daysUntil(r[3]);var isRed=!r[3]||du===null||du<=0;var label=!r[3]?'Due now':(du<0?'Overdue':du===0?'Due today':du===1?'Tomorrow':fmtDue(r[3]));var meta=(r[1]?escH(r[1]):'')+((r[2]&&r[2]!=='Anyone')?(r[1]?' · ':'')+escH(r[2]):'');return '<div class="rem-row"><span class="rem-dot" style="background:'+(isRed?'var(--st-warn)':'var(--ink-3)')+'"></span><div class="rem-mid"><div class="rem-title">'+escH(r[0])+'</div>'+(meta?'<div class="rem-meta">'+meta+'</div>':'')+'</div><span class="due-pill '+(isRed?'due-clay':'due-muted')+'">'+label+'</span></div>';}).join(''):'<div class="muted" style="font-size:13px;padding:10px 0">Nothing on the list 🎉</div>';
+  /* this week */
+  var DOWL=['Mon','Tue','Wed','Thu','Fri','Sat'];
+  var _woff=(now.getDay()+6)%7;if(now.getDay()===0)_woff=-1;var mon=new Date(now);mon.setDate(now.getDate()-_woff);
+  var week='';
+  for(var wi=0;wi<6;wi++){
+    var dd=new Date(mon);dd.setDate(mon.getDate()+wi);
+    var ds=ymd(dd.getFullYear(),dd.getMonth(),dd.getDate());
+    var bday=DATES.find(function(x){var p=(x[0]||'').split(' ');return MON3[p[0]]===dd.getMonth()&&parseInt(p[1],10)===dd.getDate();});
+    var wev=EVENTS.filter(function(e){return e.date===ds;}).sort(function(a,b){return String(a.time||'').localeCompare(String(b.time||''));})[0];
+    var chip='';
+    if(bday)chip='<span class="week-ev"><span class="pd" style="background:'+(bday[3]||'var(--accent-clay)')+'"></span>'+escH((bday[1]||'').replace(/’s Birthday/,'').replace(/'s Birthday/,''))+'</span>';
+    else if(wev){var wc=PCOL[(wev.who||['Everyone'])[0]]||'var(--ink-3)';chip='<span class="week-ev"><span class="pd" style="background:'+wc+'"></span>'+escH(wev.title)+'</span>';}
+    week+='<div class="week-day'+(bday?' hot':'')+'"><span class="week-dow">'+DOWL[wi]+'</span><span class="week-num">'+dd.getDate()+'</span>'+chip+'</div>';
+  }
+  return '<div class="gos gos-home">'
+   +'<div class="hero-band">'
+     +'<div class="tile t-clock"><div class="loc-row"><span class="dot"></span><span class="eyebrow">Gracie’s Grove · Burnet, TX</span></div><div class="greeting" id="gGreet">'+escH(greet)+'</div><div class="greet-date" id="gDate">'+dateLong+'</div><div class="clock-div"></div><div class="clock-line"><span class="clock" id="gClock">'+ch+':'+cm+'</span><span class="ampm" id="gAmPm">'+cap+'</span></div></div>'
+     +'<div class="tile t-weather" id="gWxTile">'+groveWxMain()+'</div>'
+   +'</div>'
+   +'<div class="tile t-today"><span class="eyebrow">Today</span><div class="today-list">'+todayList+'</div>'+bnudge+'</div>'
+   +'<div class="t-bank">'+bankHTML+'</div>'
+   +'<div class="tile t-week"><span class="eyebrow">This Week</span><div class="week-grid">'+week+'</div></div>'
+   +'<div class="tile t-remind"><span class="eyebrow">Reminders</span><div class="rem-list">'+remHTML+'</div></div>'
+   +'<div class="t-quick">'
+     +'<button class="qbtn" onclick="go(\'smarthome\')"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 9.5V19h14V9.5"/><path d="M10 19v-4h4v4"/></svg><span class="ql">Smart Home</span></button>'
+     +'<button class="qbtn" onclick="go(\'remotes\')"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="18" rx="4"/><circle cx="12" cy="8" r="1.3"/><path d="M12 12v4"/></svg><span class="ql">Remotes</span></button>'
+     +'<button class="qbtn" onclick="go(\'shopping\')"><svg viewBox="0 0 24 24"><path d="M5 6h14l-1.2 9.5a2 2 0 0 1-2 1.7H8.2a2 2 0 0 1-2-1.7L5 6Z"/><path d="M9 10h6"/><path d="M5 6 4 3H2.5"/></svg><span class="ql">Shopping</span></button>'
+     +'<button class="qbtn emergency" onclick="go(\'emergency\')"><svg viewBox="0 0 24 24"><path d="M12 3 3 19h18L12 3Z"/><path d="M12 10v4M12 16.5v.01"/></svg><span class="ql">Emergency</span></button>'
+     +'<button class="qbtn" onclick="go(\'kidsbank\')"><svg viewBox="0 0 24 24"><path d="M4 9 12 4l8 5"/><path d="M5 9v9h14V9"/><path d="M9 18v-5h6v5"/></svg><span class="ql">Bank</span></button>'
+   +'</div>'
+  +'</div>';
+};
+function wxWord(c){c=+c;if(c===0)return 'Clear';if(c<=2)return 'Mostly clear';if(c<=3)return 'Cloudy';if(c<=48)return 'Fog';if(c<=57)return 'Drizzle';if(c<=67)return 'Rain';if(c<=77)return 'Snow';if(c<=82)return 'Showers';if(c<=86)return 'Snow showers';if(c<=99)return 'Storms';return '';}
+function groveWxMain(){
+  var home=WTOWNS[0], d=WXDATA[home];
+  var icon=d?wxIcon(d.code,d.isDay,52):'<svg class="wx-sun" viewBox="0 0 48 48"><circle cx="24" cy="24" r="9" fill="none" stroke="var(--accent-clay)" stroke-width="2.4"/><g stroke="var(--accent-clay)" stroke-width="2.4" stroke-linecap="round"><path d="M24 5v6M24 37v6M5 24h6M37 24h6M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4"/></g></svg>';
+  var strip=WTOWNS.slice(1,5).map(function(t){var wd=WXDATA[t];return '<div class="wx-town"><span class="tt">'+(wd?wd.temp+'&deg;':'--')+'</span><span class="tn">'+escH(t)+'</span></div>';}).join('');
+  return '<div class="wx-main">'+icon+'<div><div class="wx-temp">'+(d?d.temp+'&deg;':'--&deg;')+'</div><div class="wx-cond">'+escH(home)+(d?' · '+wxWord(d.code):' · loading…')+'</div></div></div><div class="wx-strip">'+strip+'</div>';
+}
 
 /* ---------- CALENDAR ---------- */
 let calPerson='All',calSel='',calYM=null,EVENTS=[];
@@ -577,13 +735,15 @@ const WX_ACCU={'Burnet':'https://www.accuweather.com/en/us/burnet/78611/weather-
 function accuUrl(t){return WX_ACCU[t]||('https://www.accuweather.com/en/search-locations?query='+encodeURIComponent(t+', TX'))}
 let ACCOUNTS=['Spotify','Apple Music','Blink Cameras','Starlink','Roku · 3 TVs','Samsung TV','Tesla','SmartThings','Google Calendar','PetNation Feeder'];
 const FAMILY=[['Amber',C.amber,'Mom','Dec 5'],['Ryan',C.ryan,'Dad','Jan 31'],['Caden',C.caden,'Son','Jul 10'],['Gavin',C.gavin,'Son','Sep 5']];
+const GROVE=['home'];
+function syncHeader(s){var isG=GROVE.indexOf(s)>=0;var h=document.querySelector('.hdr');if(h)h.style.display=isG?'none':'';var w=document.querySelector('.wrap');if(w)w.style.paddingBottom=isG?'16px':'40px';}
 function paint(s){document.getElementById('screens').innerHTML=(SCR[s]||SCR.home)();document.querySelector('.stage').scrollTop=0}
-function render(){_view=null;const s=(location.hash||'#home').slice(1);document.querySelectorAll('.rb').forEach(r=>r.classList.toggle('on',r.dataset.s===s));document.querySelector('.stage').scrollTop=0;if(GATED[s]){PIN='';PIN_CB=()=>paint(s);document.getElementById('screens').innerHTML=lockHTML(GATED[s])}else paint(s)}
+function render(){_view=null;const s=(location.hash||'#home').slice(1);syncHeader(GATED[s]?'':s);document.querySelectorAll('.rb').forEach(r=>r.classList.toggle('on',r.dataset.s===s));document.querySelector('.stage').scrollTop=0;if(GATED[s]){PIN='';PIN_CB=()=>paint(s);document.getElementById('screens').innerHTML=lockHTML(GATED[s])}else paint(s)}
 function pin(d){if(d==='del')PIN=PIN.slice(0,-1);else if(PIN.length<4)PIN+=d;document.querySelectorAll('.pdot').forEach((el,i)=>{el.style.background=i<PIN.length?'#2A2620':'transparent'});if(PIN.length===4){if(PIN===HUBCODE){const cb=PIN_CB;PIN_CB=null;setTimeout(()=>{if(cb)cb()},230)}else{setTimeout(()=>{PIN='';document.querySelectorAll('.pdot').forEach(el=>el.style.background='transparent');toast('Wrong Hub Code')},250)}}}
 function lockHTML(label){return title(label||'Locked')+`<div class="card" style="max-width:360px;margin:6px auto"><div class="in" style="position:relative;overflow:hidden;text-align:center;padding:24px 20px"><img src="logo.png" alt="" style="position:absolute;left:50%;top:8%;transform:translateX(-50%);width:74%;opacity:.07;pointer-events:none"><div style="position:relative"><div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px">Family Vault</div><div class="s" style="font-weight:700;font-size:22px;color:#2A2620;margin-bottom:18px">Enter the Hub Code</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:210px;margin:0 auto">${[1,2,3,4,5,6,7,8,9,'star',0,'del'].map(k=>k==='star'?`<span style="height:48px;border-radius:10px;background:var(--grayt);border:1px solid var(--frame);display:flex;align-items:center;justify-content:center;font-size:22px;color:#9A958B;user-select:none">★</span>`:`<span onclick="pin('${k}')" style="height:48px;border-radius:10px;background:var(--grayt);border:1px solid var(--frame);display:flex;align-items:center;justify-content:center;font-family:'Roboto Slab',serif;font-size:19px;font-weight:700;cursor:pointer;user-select:none">${k==='del'?'⌫':k}</span>`).join('')}</div><div style="display:flex;gap:11px;justify-content:center;margin-top:18px">${[0,1,2,3].map(()=>'<span class="pdot" style="width:14px;height:14px;border-radius:50%;border:1.5px solid #2A2620;background:transparent"></span>').join('')}</div><div class="muted" style="font-size:10.5px;margin-top:16px">🔒 This page is locked — enter your Hub Code.</div></div></div></div>`}
 window.addEventListener('hashchange',render);
 
-function clock(){const d=new Date();let h=d.getHours();const m=String(d.getMinutes()).padStart(2,'0');const ap=h>=12?'PM':'AM';let gr="Mornin', Y'all";if(h>=12&&h<17)gr="Afternoon, Y'all";else if(h>=17)gr="Evenin', Y'all";h=h%12||12;document.getElementById('clock').innerHTML=h+':'+m+'<small> '+ap+'</small>';document.getElementById('greet').textContent=greetOverride||gr;document.getElementById('date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+" · Gracie's Grove";if(typeof applyTheme==='function')applyTheme();}
+function clock(){const d=new Date();let h=d.getHours();const m=String(d.getMinutes()).padStart(2,'0');const ap=h>=12?'PM':'AM';let gr="Mornin', Y'all";if(h>=12&&h<17)gr="Afternoon, Y'all";else if(h>=17)gr="Evenin', Y'all";h=h%12||12;document.getElementById('clock').innerHTML=h+':'+m+'<small> '+ap+'</small>';document.getElementById('greet').textContent=greetOverride||gr;document.getElementById('date').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+" · Gracie's Grove";var _gc=document.getElementById('gClock');if(_gc){_gc.textContent=h+':'+m;var _ga=document.getElementById('gAmPm');if(_ga)_ga.textContent=ap;var _gg=document.getElementById('gGreet');if(_gg)_gg.textContent=greetOverride||gr;var _gd=document.getElementById('gDate');if(_gd)_gd.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});}if(typeof applyTheme==='function')applyTheme();}
 let STORES=[['HEB','heb.com'],['Walmart','walmart.com'],['Home Depot','homedepot.com'],['Lowes','lowes.com'],['Tractor Supply','tractorsupply.com'],['Amazon','amazon.com'],["Dick's",'dickssportinggoods.com']];
 let _cartItem='';
 function openCartModal(item){_cartItem=item;const pad=document.querySelector('#modal .pad');pad.innerHTML='<div class="lbl" style="margin-bottom:3px">Open A Store</div><div class="s" style="font-weight:700;font-size:16px;margin-bottom:4px">'+item+'</div><div class="muted" style="font-size:12px;margin-bottom:13px">Which store do you want to open to add this?</div>'+STORES.map(function(s,i){return '<button class="storebtn" style="margin-bottom:8px" onclick="pickStore('+i+')"><img src="https://www.google.com/s2/favicons?sz=64&domain='+s[1]+'" alt="'+s[0]+'" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex:none"><span style="flex:1;text-align:left">'+s[0]+'</span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" stroke="#C7C0B0" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>'}).join('')+'<button onclick="closeModal()" style="width:100%;height:40px;border-radius:10px;border:none;background:none;color:var(--ink3);font-size:12.5px;font-weight:700;cursor:pointer;margin-top:4px">Cancel</button>';document.getElementById('modal').classList.add('show')}
@@ -753,7 +913,7 @@ function wxIcon(code,isDay,size){size=size||30;const g='#C9A24E',b='#6E8B9A';con
 function wxStripHTML(){return WTOWNS.map(function(t,i){const d=WXDATA[t];return '<div class="tile" onclick="window.open(accuUrl(\''+jsq(t)+'\'),\'_blank\')" title="Open AccuWeather for '+escH(t)+'" style="cursor:pointer;flex-direction:column;gap:5px;padding:11px 6px;text-align:center;justify-content:center'+(i===0?';border:1.5px solid var(--bluer)':'')+'">'+(d?wxIcon(d.code,d.isDay,22):'<span style=\"width:22px;height:22px;display:block\"></span>')+'<b class="s" style="font-size:15px">'+(d?d.temp+'&deg;':'--')+'</b><div class="muted" style="font-size:9.5px;font-weight:700;line-height:1.15">'+escH(t)+'</div></div>'}).join('')}
 async function wxGeocode(name){if(WXCOORDS[name])return WXCOORDS[name];try{const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name='+encodeURIComponent(name));const j=await r.json();if(j&&j.results&&j.results[0]){const c=[j.results[0].latitude,j.results[0].longitude];WXCOORDS[name]=c;return c}}catch(e){}return null}
 async function fetchWeather(){try{const towns=WTOWNS.slice();const resolved=[];for(const t of towns){const c=await wxGeocode(t);if(c)resolved.push({t:t,c:c})}if(!resolved.length)return;const lats=resolved.map(o=>o.c[0]).join(',');const lons=resolved.map(o=>o.c[1]).join(',');const url='https://api.open-meteo.com/v1/forecast?latitude='+lats+'&longitude='+lons+'&current=temperature_2m,weather_code,is_day&daily=sunrise,sunset&temperature_unit=fahrenheit&timezone=America%2FChicago&forecast_days=1';const r=await fetch(url);const j=await r.json();const arr=Array.isArray(j)?j:[j];resolved.forEach(function(o,i){const d=arr[i];if(d&&d.current){WXDATA[o.t]={temp:Math.round(d.current.temperature_2m),code:d.current.weather_code,isDay:d.current.is_day};if(i===0&&d.daily&&d.daily.sunrise){WXSUN={sunrise:d.daily.sunrise[0],sunset:d.daily.sunset[0]}}}});applyWeather()}catch(e){}}
-function applyWeather(){const home=WTOWNS[0];const d=WXDATA[home];const el=document.getElementById('wx');if(el&&d){el.innerHTML=wxIcon(d.code,d.isDay,30)+'<div><div class="s" style="font-weight:700;font-size:18px">'+d.temp+'&deg;</div><div style="font-size:10px;color:var(--ink2)">'+escH(home)+'</div></div>'}const s=(location.hash||'#home').slice(1);if((s===''||s==='home')&&document.getElementById('wxStrip')){document.getElementById('wxStrip').innerHTML=wxStripHTML()}applyTheme()}
+function applyWeather(){const home=WTOWNS[0];const d=WXDATA[home];const el=document.getElementById('wx');if(el&&d){el.innerHTML=wxIcon(d.code,d.isDay,30)+'<div><div class="s" style="font-weight:700;font-size:18px">'+d.temp+'&deg;</div><div style="font-size:10px;color:var(--ink2)">'+escH(home)+'</div></div>'}const s=(location.hash||'#home').slice(1);if((s===''||s==='home')&&document.getElementById('wxStrip')){document.getElementById('wxStrip').innerHTML=wxStripHTML()}var _gw=document.getElementById('gWxTile');if(_gw&&typeof groveWxMain==='function'){_gw.innerHTML=groveWxMain()}applyTheme()}
 /* ---------- BIRTHDAY TAKEOVER (date-driven, no storage) ---------- */
 const MON3={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
 function birthdayToday(d){d=d||new Date();return FAMILY.find(function(m){const p=(m[3]||'').split(' ');return MON3[p[0]]===d.getMonth()&&parseInt(p[1],10)===d.getDate()})||null}

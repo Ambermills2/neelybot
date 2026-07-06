@@ -773,7 +773,7 @@ function openMusicApp(dom,name){musicSrc=name;window.open('https://'+dom,'_blank
 function openSelectedMusic(){openMusicApp(musicSrc==='Apple Music'?'music.apple.com':'open.spotify.com',musicSrc)}
 /* ---------- FAMILY SYNC (Firebase Auth + Firestore · one household doc) ---------- */
 const FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
-let fbAuth=null,fbDb=null,fbDoc=null,fbUser=null,fbUnsub=null,fbReady=false,_hydrating=false,_saveT=null,_seeded=false,_dirty=false;
+let fbAuth=null,fbDb=null,fbDoc=null,fbUser=null,fbUnsub=null,fbReady=false,_hydrating=false,_saveT=null,_seeded=false,_dirty=false,_synced=false;
 function fbInit(){
   if(typeof firebase==='undefined'||fbReady)return;
   try{
@@ -800,11 +800,14 @@ function fbSignIn(){
 function fbSignOut(){if(fbAuth)fbAuth.signOut().then(function(){toast('Signed out · this device stops syncing');fbReflect();});}
 function fbSubscribe(){
   if(!fbDoc)return;if(fbUnsub)fbUnsub();
+  _synced=false;_dirty=false;
   fbUnsub=fbDoc.onSnapshot(function(snap){
     if(snap.metadata.hasPendingWrites)return;
-    if(_dirty)return;
-    if(snap.exists){var d=snap.data();if(d&&d.stateJson){try{applyState(JSON.parse(d.stateJson));saveLocal();}catch(e){console.warn('[sync] parse',e);}_hydrating=true;repaintCurrent();_hydrating=false;}}
-    else if(!_seeded){_seeded=true;fbSaveNow();}
+    if(snap.exists){
+      _synced=true;
+      if(_dirty)return;
+      var d=snap.data();if(d&&d.stateJson){try{applyState(JSON.parse(d.stateJson));saveLocal();}catch(e){console.warn('[sync] parse',e);}_hydrating=true;repaintCurrent();_hydrating=false;}
+    }else if(!_seeded){_seeded=true;_synced=true;fbSaveNow();}else{_synced=true;}
   },function(e){console.warn('[sync] snapshot',e);});
 }
 function snapshotState(){
@@ -834,9 +837,9 @@ function applyState(st){
 }
 function saveLocal(){if(_hydrating)return;try{localStorage.setItem('neelybot_state',JSON.stringify(snapshotState()));}catch(e){}}
 function loadLocal(){try{var s=localStorage.getItem('neelybot_state');if(s){applyState(JSON.parse(s));}}catch(e){console.warn('[local] load',e);}}
-function fbSaveSoon(){saveLocal();if(_hydrating||!fbReady||!fbUser||!fbDoc)return;_dirty=true;if(_saveT)clearTimeout(_saveT);_saveT=setTimeout(fbSaveNow,900);}
+function fbSaveSoon(){saveLocal();if(_hydrating||!fbReady||!fbUser||!fbDoc||!_synced)return;_dirty=true;if(_saveT)clearTimeout(_saveT);_saveT=setTimeout(fbSaveNow,900);}
 function fbSaveNow(){
-  if(!fbReady||!fbUser||!fbDoc)return;if(_saveT){clearTimeout(_saveT);_saveT=null;}
+  if(!fbReady||!fbUser||!fbDoc||!_synced)return;if(_saveT){clearTimeout(_saveT);_saveT=null;}
   try{fbDoc.set({stateJson:JSON.stringify(snapshotState()),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:(fbUser.email||fbUser.displayName||'family')},{merge:true}).then(function(){if(!_saveT)_dirty=false;}).catch(function(e){console.warn('[sync] save',e);});}catch(e){console.warn('[sync] save',e);}
 }
 function fbSyncCard(){

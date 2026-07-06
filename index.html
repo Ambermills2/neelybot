@@ -183,7 +183,7 @@ details[open]>summary .ic{transform:rotate(180deg)}
   --font-body:'Source Sans 3',system-ui,sans-serif;
 }
 .gos{font-family:var(--font-body);color:var(--ink);min-height:calc(100vh - 56px)}
-.gos.gos-home{display:grid;grid-template-columns:1.55fr 1fr;grid-template-rows:auto 1fr auto auto;gap:13px}
+.gos.gos-home{display:grid;grid-template-columns:1.55fr 1fr;grid-template-rows:auto 1fr auto auto;gap:13px;height:calc(100vh - 56px)}
 .gos .hero-band{grid-column:1 / -1;display:grid;grid-template-columns:1.55fr 1fr;gap:14px}
 .gos .tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-tile);box-shadow:var(--shadow-tile);padding:16px 18px;min-width:0;display:block;align-items:stretch;text-align:left}
 .gos .eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--ink-3)}
@@ -208,7 +208,10 @@ details[open]>summary .ic{transform:rotate(180deg)}
 .gos .wx-town .tt{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
 .gos .wx-town .tn{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* today */
-.gos .t-today{grid-column:1;grid-row:2;display:flex;flex-direction:column;overflow:hidden}
+.gos .t-today{grid-column:2;grid-row:3;display:flex;flex-direction:column;overflow:hidden}
+.gos .t-split{grid-column:1;grid-row:2;display:grid;grid-template-columns:1fr 1fr;gap:13px;min-width:0;min-height:0}
+.gos .t-projects{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;cursor:pointer}
+.gos .t-projects .rem-list{flex:1;overflow-y:auto;min-height:0}
 .gos .today-list{display:flex;flex-direction:column;margin-top:10px;flex:1;overflow-y:auto}
 .gos .ev-row{display:flex;align-items:center;gap:13px;padding:11px 0;border-top:1px solid var(--line)}
 .gos .ev-row:first-child{border-top:none}
@@ -238,7 +241,8 @@ details[open]>summary .ic{transform:rotate(180deg)}
 .gos .pill{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:5px 10px;border-radius:999px;white-space:nowrap}
 .gos .pill-pending{background:var(--accent-sage-tint);color:var(--saged)}
 /* reminders */
-.gos .t-remind{grid-column:2;grid-row:3;display:flex;flex-direction:column}
+.gos .t-remind{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;cursor:pointer}
+.gos .t-remind .rem-list{flex:1;overflow-y:auto;min-height:0}
 .gos .rem-list{margin-top:9px;display:flex;flex-direction:column}
 .gos .rem-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
 .gos .rem-row:first-child{border-top:none}
@@ -365,8 +369,12 @@ SCR.home=function(){
   /* reminders */
   var due=REMINDERS.filter(function(r){return !r[3]||r[3]<=tstr;}).sort(function(a,b){var ad=a[3]||'',bd=b[3]||'';if(ad&&bd)return ad.localeCompare(bd);if(ad&&!bd)return -1;if(!ad&&bd)return 1;return 0;});
   var soon=REMINDERS.filter(function(r){return r[3]&&r[3]>tstr;}).sort(function(a,b){return a[3].localeCompare(b[3]);});
-  var topR=due.concat(soon).slice(0,4);
+  var topR=due.concat(soon).slice(0,7);
   var remHTML=topR.length?topR.map(function(r){var du=daysUntil(r[3]);var isRed=!r[3]||du===null||du<=0;var label=!r[3]?'Due now':(du<0?'Overdue':du===0?'Due today':du===1?'Tomorrow':fmtDue(r[3]));var meta=(r[1]?escH(r[1]):'')+((r[2]&&r[2]!=='Anyone')?(r[1]?' · ':'')+escH(r[2]):'');return '<div class="rem-row"><span class="rem-dot" style="background:'+(isRed?'var(--st-warn)':'var(--ink-3)')+'"></span><div class="rem-mid"><div class="rem-title">'+escH(r[0])+'</div>'+(meta?'<div class="rem-meta">'+meta+'</div>':'')+'</div><span class="due-pill '+(isRed?'due-clay':'due-muted')+'">'+label+'</span></div>';}).join(''):'<div class="muted" style="font-size:13px;padding:10px 0">Nothing on the list 🎉</div>';
+  /* projects */
+  var projRank={'Due Now':0,'In Progress':1,'Planning':2,'Done':3};
+  var projSorted=PROJECTS.map(function(p,i){return {p:p,i:i};}).sort(function(a,b){var ra=projRank[a.p.status];var rb=projRank[b.p.status];return (ra==null?9:ra)-(rb==null?9:rb);});
+  var projHTML=projSorted.length?projSorted.map(function(o){var p=o.p;var sc=p.status==='Due Now'?'var(--st-over)':p.status==='In Progress'?'var(--st-warn)':p.status==='Done'?'var(--st-good)':'var(--ink-3)';var tot=(p.steps||[]).length,dn=(p.steps||[]).filter(function(s){return s[1];}).length;var meta=(p.status==='Due Now'?'Due now':p.status)+(tot?' · '+dn+'/'+tot+' steps':'');var goal=p.due?(/^\d{4}-\d{2}-\d{2}$/.test(p.due)?fmtDue(p.due):p.due):'';return '<div class="rem-row"><span class="rem-dot" style="background:'+sc+'"></span><div class="rem-mid"><div class="rem-title">'+escH(p.name)+'</div><div class="rem-meta">'+escH(meta)+'</div></div>'+(goal?'<span class="due-pill due-muted">'+escH(goal)+'</span>':'')+'</div>';}).join(''):'<div class="muted" style="font-size:13px;padding:10px 0">No projects yet.</div>';
   /* this week */
   var DOWL=['Mon','Tue','Wed','Thu','Fri','Sat'];
   var _woff=(now.getDay()+6)%7;if(now.getDay()===0)_woff=-1;var mon=new Date(now);mon.setDate(now.getDate()-_woff);
@@ -386,10 +394,13 @@ SCR.home=function(){
      +'<div class="tile t-clock"><div class="loc-row"><span class="dot"></span><span class="eyebrow">Gracie’s Grove · Burnet, TX</span></div><div class="greeting" id="gGreet">'+escH(greet)+'</div><div class="greet-date" id="gDate">'+dateLong+'</div><div class="clock-div"></div><div class="clock-line"><span class="clock" id="gClock">'+ch+':'+cm+'</span><span class="ampm" id="gAmPm">'+cap+'</span></div></div>'
      +'<div class="tile t-weather" id="gWxTile">'+groveWxMain()+'</div>'
    +'</div>'
-   +'<div class="tile t-today"><span class="eyebrow">Today</span><div class="today-list">'+todayList+'</div>'+bnudge+'</div>'
+   +'<div class="t-split">'
+     +'<div class="tile t-remind" onclick="go(\'reminders\')"><span class="eyebrow">Reminders</span><div class="rem-list">'+remHTML+'</div></div>'
+     +'<div class="tile t-projects" onclick="go(\'projects\')"><span class="eyebrow">Projects</span><div class="rem-list">'+projHTML+'</div></div>'
+   +'</div>'
    +'<div class="t-bank">'+bankHTML+'</div>'
    +'<div class="tile t-week"><span class="eyebrow">This Week</span><div class="week-grid">'+week+'</div></div>'
-   +'<div class="tile t-remind"><span class="eyebrow">Reminders</span><div class="rem-list">'+remHTML+'</div></div>'
+   +'<div class="tile t-today" onclick="go(\'calendar\')"><span class="eyebrow">Today</span><div class="today-list">'+todayList+'</div>'+bnudge+'</div>'
    +'<div class="t-quick">'
      +'<button class="qbtn" onclick="go(\'smarthome\')"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 9.5V19h14V9.5"/><path d="M10 19v-4h4v4"/></svg><span class="ql">Smart Home</span></button>'
      +'<button class="qbtn" onclick="go(\'remotes\')"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="18" rx="4"/><circle cx="12" cy="8" r="1.3"/><path d="M12 12v4"/></svg><span class="ql">Remotes</span></button>'

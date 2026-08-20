@@ -391,7 +391,7 @@ SCR.home=function(){
     else if(wev){var wc=PCOL[(wev.who||['Everyone'])[0]]||'var(--ink-3)';chip='<span class="week-ev"><span class="pd" style="background:'+wc+'"></span>'+escH(wev.title)+'</span>';}
     week+='<div class="week-day'+(bday?' hot':'')+'"><span class="week-dow">'+DOWL[wi]+'</span><span class="week-num">'+dd.getDate()+'</span>'+chip+'</div>';
   }
-  return '<div class="gos gos-home">'
+  return fbSyncCard()+'<div class="gos gos-home">'
    +'<div class="hero-band">'
      +'<div class="tile t-clock"><div class="loc-row"><span class="dot"></span><span class="eyebrow">Gracie’s Grove · Burnet, TX</span></div><div class="greeting" id="gGreet">'+escH(greet)+'</div><div class="greet-date" id="gDate">'+dateLong+'</div><div class="clock-div"></div><div class="clock-line"><span class="clock" id="gClock">'+ch+':'+cm+'</span><span class="ampm" id="gAmPm">'+cap+'</span></div></div>'
      +'<div class="tile t-weather" id="gWxTile">'+groveWxMain()+'</div>'

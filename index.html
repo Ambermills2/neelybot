@@ -485,7 +485,7 @@ return title('Calendar')+gcalBar()+`<div class="card"><div class="in"><div style
 let choreFilter='All';
 let choresResetDate='';
 let _undone8=(new Date().getHours()>=20);
-function resetChoresDaily(){var t=todayYMD();if(choresResetDate===t)return false;choresResetDate=t;APPROVALS.length=0;var yWd=(((new Date().getDay()+6)%7)+6)%7;for(var i=0;i<CHORES.length;i++){var c=CHORES[i];var info=choreDaysInfo(c);var onListYest=(!info.idxs.length)||(info.idxs.indexOf(yWd)>=0)||c[11]===1;c[11]=(onListYest&&c[5]!=='done'&&c[5]!=='skip')?1:0;c[5]='todo';c[6]=0;}return true;}
+function resetChoresDaily(){var t=todayYMD();if(choresResetDate===t)return false;choresResetDate=t;var yWd=(((new Date().getDay()+6)%7)+6)%7;for(var i=0;i<CHORES.length;i++){var c=CHORES[i];var info=choreDaysInfo(c);var onListYest=(!info.idxs.length)||(info.idxs.indexOf(yWd)>=0)||c[11]===1;c[11]=(onListYest&&c[5]!=='done'&&c[5]!=='skip')?1:0;c[5]='todo';c[6]=0;}return true;}
 function checkChoreReset(){if(!resetChoresDaily())return;fbSaveSoon();if((location.hash||'#home').slice(1)==='chores'){var s=document.getElementById('screens');if(s){var st=document.querySelector('.stage');var y=st?st.scrollTop:0;s.innerHTML=SCR.chores();if(st)st.scrollTop=y;}}}
 function checkUndoneWindow(){var p8=new Date().getHours()>=20;if(p8===_undone8)return;_undone8=p8;if((location.hash||'#home').slice(1)==='chores'){var s=document.getElementById('screens');if(s){var st=document.querySelector('.stage');var y=st?st.scrollTop:0;s.innerHTML=SCR.chores();if(st)st.scrollTop=y;}}}
 let _choreBankOpen=false;

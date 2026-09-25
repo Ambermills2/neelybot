@@ -310,10 +310,13 @@ function lessTx(kid){TXSHOW[kid]=8;render();}
 function removeTx(kid,ti){
   var tx=TX()[kid];if(!tx||!tx[ti])return;
   var t=tx[ti],amt=Number(t[2])||0,b=BAL()[kid];
-  confirmSheet('Remove transaction?','"'+esc(t[0])+'" ('+(amt>0?'+':'−')+'$'+Math.abs(amt).toFixed(2)+') will be deleted and the balance adjusted back.',function(){
-    if(b){b.bal-=amt;if(amt>0)b.wk=Math.max(0,(b.wk||0)-amt);}
-    tx.splice(ti,1);save();render();toast('Transaction removed');
-  },'Remove','b-red');
+  gate('Enter the Hub Code to delete a transaction',function(){
+    confirmSheet('Remove transaction?','"'+esc(t[0])+'" ('+(amt>0?'+':'−')+'$'+Math.abs(amt).toFixed(2)+') will be deleted and the balance adjusted back.',function(){
+      if(!tx[ti])return;
+      if(b){b.bal-=amt;if(amt>0)b.wk=Math.max(0,(b.wk||0)-amt);}
+      tx.splice(ti,1);save();render();toast('Transaction removed');
+    },'Remove','b-red');
+  });
 }
 function doBankMove(kid,dir){
   var amt=parseFloat((document.getElementById('bmAmt')||{}).value)||0;if(amt<=0){toast('Enter an amount');return;}

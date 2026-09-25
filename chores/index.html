@@ -127,7 +127,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-2b';
+var BUILD='KIDS-2c';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};
@@ -380,6 +380,10 @@ function pendingChores(){var t=todayYMD(),out=[],list=CH();
   for(var i=0;i<list.length;i++){var c=list[i];if(!c)continue;
     if((c[5]==='wait'||c[5]==='skipwait')&&(!c[13]||c[13]===t))out.push({i:i,c:c});}
   return out;}
+function approvedToday(){var t=todayYMD(),out=[],list=CH();
+  for(var i=0;i<list.length;i++){var c=list[i];if(!c)continue;
+    if((c[5]==='done'||c[5]==='skip')&&c[13]===t)out.push({i:i,c:c});}
+  return out;}
 function approveChoreAt(i){var c=CH()[i];if(!c)return;var t=todayYMD();
   var isSkip=(c[5]==='skipwait'),amt=isSkip?0:payAmt(c[4]),kid=c[0],b=BAL()[kid],tx=TX()[kid];
   if(!isSkip&&b&&amt>0){b.bal+=amt;b.wk=(b.wk||0)+amt;if(tx)tx.unshift([c[3],txDate(),amt]);}
@@ -417,6 +421,20 @@ function bankAppView(){
         :'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="rejectChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Reject</button><button onclick="approveChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Approve</button></div>')
       +'</div></div>';
   });}
+  /* --- already approved today (so this page matches the chore list) --- */
+  var appd=approvedToday();
+  if(appd.length){
+    out+='<div class="eyebrow" style="margin:18px 0 8px">Approved Today</div>';
+    appd.forEach(function(o){
+      var c=o.c,i=o.i,isSkip=(c[5]==='skip'),amt=payAmt(c[4]);
+      out+='<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:10px">'
+        +'<span class="av" style="width:30px;height:30px;font-size:13px;background:'+(KIDCOL[c[0]]||c[1]||'#999')+'">'+esc((c[0]||'?')[0])+'</span>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:800">'+c[3]+'</div><div style="font-size:11.5px;color:var(--ink3)">'+esc(c[0])+' \u00b7 '+(isSkip?'skip allowed \u2014 no money':'paid '+money(amt))+'</div></div>'
+        +'<span class="chip '+(isSkip?'skip':'done')+'" style="font-size:11px;padding:6px 10px">'+(isSkip?'\u23ed Skipped':'\u2713 Paid')+'</span></div>'
+        +'<div style="display:flex;margin-top:11px"><button onclick="'+(isSkip?'unskip('+i+')':'undoDone('+i+')')+'" style="flex:1;height:42px;border-radius:11px;border:1.5px solid var(--line);background:none;color:var(--ink2);font-weight:800;font-size:14px">Undo'+(isSkip?'':' \u00b7 take back '+money(amt))+'</button></div>'
+        +'</div></div>';
+    });
+  }
   /* --- bank requests --- */
   out+='<div class="eyebrow" style="margin:18px 0 8px">Bank Requests</div>';
   if(!reqs.length){out+='<div class="card"><div class="in"><div class="empty">No pending requests.</div></div></div>';return out;}
@@ -483,7 +501,7 @@ function render(){
     app.innerHTML=head+body;return;
   }
   if(!STATE){body='<div class="stage"><div class="card"><div class="in"><div class="empty">Loading your chores…</div></div></div></div>';app.innerHTML=head+body;return;}
-  body='<div class="stage">'+(TAB==='chores'?choresView():TAB==='bankapp'?bankAppView():bankView())+'<div class="build">Build '+BUILD+'</div>'+choreDiag()+'</div>';
+  body='<div class="stage">'+(TAB==='chores'?choresView():TAB==='bankapp'?bankAppView():bankView())+'<div class="build">Build '+BUILD+'</div></div>';
   var nreq=BREQ().length+pendingChores().length;
   var nav='<div class="nav"><a href="javascript:void(0)" onclick="go(\'chores\')" class="'+(TAB==='chores'?'on':'')+'">'+ic('check')+'Chores</a>'
     +'<a href="javascript:void(0)" onclick="go(\'bank\')" class="'+(TAB==='bank'?'on':'')+'">'+ic('bank')+'Bank</a>'

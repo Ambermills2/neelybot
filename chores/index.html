@@ -355,21 +355,41 @@ function approveBank(i){
   BREQ().splice(i,1);save();render();toast((r.dir==='in'?'Deposited ':'Withdrew ')+money(r.amt)+' · '+esc(r.kid));
 }
 function declineBank(i){var r=BREQ()[i];if(!r)return;BREQ().splice(i,1);save();render();toast('Request declined · no money moved');}
+/* every chore the kids marked done/skipped today = the pending list (single source of truth) */
+function pendingChores(){var t=todayYMD(),out=[],list=CH();
+  for(var i=0;i<list.length;i++){var c=list[i];if(!c)continue;
+    if((c[5]==='wait'||c[5]==='skipwait')&&(!c[13]||c[13]===t))out.push({i:i,c:c});}
+  return out;}
+function approveChoreAt(i){var c=CH()[i];if(!c)return;var t=todayYMD();
+  var isSkip=(c[5]==='skipwait'),amt=isSkip?0:payAmt(c[4]),kid=c[0],b=BAL()[kid],tx=TX()[kid];
+  if(!isSkip&&b&&amt>0){b.bal+=amt;b.wk=(b.wk||0)+amt;if(tx)tx.unshift([c[3],txDate(),amt]);}
+  c[5]=isSkip?'skip':'done';c[13]=t;
+  for(var k=AP().length-1;k>=0;k--){if(AP()[k].ci===i)AP().splice(k,1);}
+  save();render();toast(isSkip?'Skip allowed \u23ed':'Approved \u00b7 +'+money(amt)+' to '+kid+' \ud83d\udcb0');}
+function rejectChoreAt(i){var c=CH()[i];if(!c)return;
+  var isSkip=(c[5]==='skipwait');
+  for(var k=AP().length-1;k>=0;k--){if(AP()[k].ci===i)AP().splice(k,1);}
+  c[5]='incomplete';c[11]=0;c[13]='';save();render();
+  var ttl=c[3];
+  sheetHTML('<h3>Add chore back in?</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">'+(isSkip?'Skip denied.':'Rejected \u2014 no money moved.')+' Put "'+ttl+'" back on the list so they still do it?</div>'
+    +'<div class="row2"><button class="b-ghost" onclick="skipDenyBack('+i+',false)">No</button><button class="b-green" onclick="skipDenyBack('+i+',true)">Yes, add it back</button></div>');}
 function bankAppView(){
-  var reqs=BREQ(),ap=AP();
-  var tot=reqs.length+ap.length;
+  var reqs=BREQ();
+  var tot=reqs.length+pendingChores().length;
   var out='<div style="margin-bottom:14px"><div style="font-size:22px;font-weight:800;line-height:1">Approvals</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+(tot?tot+' waiting':'Nothing waiting')+'</div></div>';
-  /* --- chore approvals --- */
+  /* --- chore approvals: derived straight from the chores, so they can never drift --- */
+  var pend=pendingChores();
   out+='<div class="eyebrow" style="margin:2px 0 8px">Chores</div>';
-  if(!ap.length){out+='<div class="card"><div class="in"><div class="empty">No chores waiting.</div></div></div>';}
-  else{ap.forEach(function(a,i){
-    out+='<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:10px"><span class="av" style="width:32px;height:32px;font-size:14px;background:'+(KIDCOL[a.who]||a.color||'#999')+'">'+esc((a.who||'?')[0])+'</span>'
-      +'<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800">'+a.title+'</div><div style="font-size:11.5px;color:var(--ink3)">'+esc(a.who)+(a.desc?' · '+a.desc:'')+'</div></div>'
-      +(a.skip?'<span class="chip skip" style="font-size:11px;padding:5px 9px">⏭ Skip</span>':'<span class="pay" style="font-size:14px">'+money(a.amt)+'</span>')+'</div>'
-      +(a.skip
-        ?'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">Asking to skip today — no money either way.</div>'
-         +'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="reject('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Deny</button><button onclick="approve('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Allow Skip</button></div>'
-        :'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="reject('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Reject</button><button onclick="approve('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Approve</button></div>')
+  if(!pend.length){out+='<div class="card"><div class="in"><div class="empty">No chores waiting.</div></div></div>';}
+  else{pend.forEach(function(o){
+    var c=o.c,i=o.i,isSkip=(c[5]==='skipwait'||c[5]==='skip'),amt=payAmt(c[4]);
+    out+='<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:10px"><span class="av" style="width:32px;height:32px;font-size:14px;background:'+(KIDCOL[c[0]]||c[1]||'#999')+'">'+esc((c[0]||'?')[0])+'</span>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800">'+c[3]+'</div><div style="font-size:11.5px;color:var(--ink3)">'+esc(c[0])+(c[7]?' \u00b7 '+c[7]:'')+'</div></div>'
+      +(isSkip?'<span class="chip skip" style="font-size:11px;padding:5px 9px">\u23ed Skip</span>':'<span class="pay" style="font-size:14px">'+money(amt)+'</span>')+'</div>'
+      +(isSkip
+        ?'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">Asking to skip today \u2014 no money either way.</div>'
+         +'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="rejectChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Deny</button><button onclick="approveChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Allow Skip</button></div>'
+        :'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="rejectChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Reject</button><button onclick="approveChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Approve</button></div>')
       +'</div></div>';
   });}
   /* --- bank requests --- */
@@ -439,7 +459,7 @@ function render(){
   }
   if(!STATE){body='<div class="stage"><div class="card"><div class="in"><div class="empty">Loading your chores…</div></div></div></div>';app.innerHTML=head+body;return;}
   body='<div class="stage">'+(TAB==='chores'?choresView():TAB==='bankapp'?bankAppView():bankView())+'<div class="build">Build '+BUILD+'</div></div>';
-  var nreq=BREQ().length+AP().length;
+  var nreq=BREQ().length+pendingChores().length;
   var nav='<div class="nav"><a href="javascript:void(0)" onclick="go(\'chores\')" class="'+(TAB==='chores'?'on':'')+'">'+ic('check')+'Chores</a>'
     +'<a href="javascript:void(0)" onclick="go(\'bank\')" class="'+(TAB==='bank'?'on':'')+'">'+ic('bank')+'Bank</a>'
     +'<a href="javascript:void(0)" onclick="openBankTab()" class="'+(TAB==='bankapp'?'on':'')+'" style="position:relative">'+ic('lock')+'Approvals'+'<span id="navBadge" style="position:absolute;top:0;right:22%;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#C0553D;color:#fff;font-size:10px;font-weight:800;'+(nreq?'display:flex':'display:none')+';align-items:center;justify-content:center">'+(nreq>9?'9+':nreq)+'</span></a></div>';
@@ -463,12 +483,12 @@ function refreshRow(i){
   var el=document.getElementById('ctl-'+i),c=CH()[i];
   if(!el||!c)return false;
   el.innerHTML=choreControl(c,i);
-  var n=BREQ().length+AP().length,b=document.getElementById('navBadge');
+  var n=BREQ().length+pendingChores().length,b=document.getElementById('navBadge');
   if(b){if(n){b.textContent=n>9?'9+':n;b.style.display='flex';}else{b.style.display='none';}}
   var ban=document.getElementById('apBanner');
-  if(ban)ban.style.display=AP().length?'':'none';
-  var cnt=document.getElementById('apCount');if(cnt)cnt.textContent=AP().length;
-  var cnt2=document.getElementById('apCount2');if(cnt2)cnt2.textContent=AP().length+' waiting';
+  var npc=pendingChores().length;if(ban)ban.style.display=npc?'':'none';
+  var cnt=document.getElementById('apCount');if(cnt)cnt.textContent=npc;
+  var cnt2=document.getElementById('apCount2');if(cnt2)cnt2.textContent=npc+' waiting';
   return true;
 }
 function previewRow(c){var pay=c[4]?'<span class="pay">'+esc(c[4])+'</span>':'';return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+'</div>';}
@@ -484,7 +504,7 @@ function choresView(){
   var out='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:22px;font-weight:800;line-height:1">'+title+'</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+sub+'</div></div><button onclick="addChore()" style="height:44px;padding:0 16px;background:var(--sage);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;flex:none">+ Add</button></div>';
   var dchips=[{v:-1,l:'Today'}];for(var d=0;d<7;d++)dchips.push({v:d,l:DOW3[d]});
   out+='<div class="dayfilter">'+dchips.map(function(c){return '<span class="dchip'+((VIEWDAY===c.v)?' on':'')+'" onclick="setViewDay('+c.v+')">'+c.l+'</span>';}).join('')+'</div>';
-  if(isToday){out+='<div class="banner" id="apBanner" style="'+(ap.length?'':'display:none')+'"><span class="n" id="apCount">'+ap.length+'</span><div><b id="apCount2">'+ap.length+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openBankTab()">Review</span></div>';}
+  var np=pendingChores().length;if(isToday){out+='<div class="banner" id="apBanner" style="'+(np?'':'display:none')+'"><span class="n" id="apCount">'+np+'</span><div><b id="apCount2">'+np+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openBankTab()">Review</span></div>';}
   var ks=kids();if(!ks.length)ks=['Caden','Gavin'];
   ks.forEach(function(kid){
     var rows=[];

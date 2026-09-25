@@ -31,22 +31,25 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 .kidname{font-size:18px;font-weight:800}
 .kidbal{margin-left:auto;font-size:26px;font-weight:800;line-height:1}
 .kidbal .c{font-size:15px;color:var(--ink3)}
-.chore{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+.chore{display:flex;align-items:center;gap:9px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:nowrap}
 .chore:first-child{border-top:none}
-.chore .body{flex:1;min-width:0}
-.chore .ttl{font-size:15.5px;font-weight:700;line-height:1.2}
-.chore .desc{font-size:11.5px;color:var(--ink3);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.chore .pay{font-size:12px;font-weight:800;color:var(--saged);background:var(--saget);padding:3px 8px;border-radius:8px;flex:none}
+.chore .body{flex:1 1 auto;min-width:0}
+.chore .ttl{font-size:15px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.chore .desc{font-size:11.5px;color:var(--ink3);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
+.chore .paylin{display:inline-block;margin-top:5px;font-size:11.5px;font-weight:800;color:var(--saged);background:var(--saget);padding:3px 8px;border-radius:7px}
+.chore .pay{font-size:12px;font-weight:800;color:var(--saged);background:var(--saget);padding:4px 0;border-radius:8px;flex:0 0 46px;width:46px;text-align:center;white-space:nowrap}
 .btn{border:none;border-radius:12px;font-weight:800;cursor:pointer;font-family:inherit}
-.done-btn{height:44px;min-width:92px;padding:0 16px;background:var(--saged);color:#fff;font-size:15px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px}
+.done-btn{height:40px;flex:1 1 auto;min-width:0;padding:0 8px;background:var(--saged);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
 .done-btn:active{transform:scale(.96)}
-.chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:800;padding:9px 13px;border-radius:11px;flex:none}
+.chip{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:12.5px;font-weight:800;padding:9px 6px;border-radius:11px;flex:none;white-space:nowrap}
+.chore .ctl{flex:0 0 126px;width:126px;display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:nowrap}
+.chore .ctl .chip{width:100%}
 .chip.done{color:var(--saged);border:1.5px solid var(--sage);background:none}
 .chip.paid{color:#fff;background:var(--saged);border:1.5px solid var(--saged)}
 .chip.wait{color:var(--goldd);background:var(--goldt)}
 .chip.skip{color:var(--gray);background:var(--grayt)}
 .chip.inc{color:var(--red);background:var(--redt)}
-.skip-x{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--line);background:none;color:var(--ink3);font-size:11px;font-weight:800;flex:none}
+.skip-x{flex:0 0 42px;width:42px;height:40px;border-radius:10px;border:1.5px solid var(--line);background:none;color:var(--ink3);font-size:11.5px;font-weight:800}
 .empty{font-size:13px;color:var(--ink3);padding:8px 0}
 .banner{display:flex;align-items:center;gap:12px;background:var(--goldt);border:1px solid #E4D2A6;border-radius:16px;padding:14px 16px;margin-bottom:13px}
 .banner .n{width:34px;height:34px;border-radius:50%;background:var(--goldd);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
@@ -92,7 +95,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 .dayfilter::-webkit-scrollbar{display:none}
 .dchip{padding:9px 15px;border-radius:22px;font-weight:800;font-size:13px;border:1.5px solid var(--line);color:var(--ink2);flex:none;background:var(--surface);cursor:pointer}
 .dchip.on{background:var(--rail);color:#EDE6D8;border-color:var(--rail)}
-.editbtn{width:38px;height:38px;border-radius:11px;border:1.5px solid var(--line);background:none;color:var(--ink3);flex:none;display:flex;align-items:center;justify-content:center;padding:0;margin-left:2px}
+.editbtn{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--line);background:none;color:var(--ink3);flex:0 0 34px;display:flex;align-items:center;justify-content:center;padding:0;margin-left:0}
 .editbtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .monthwrap{display:flex;gap:8px;align-items:center;margin-top:8px}
 .monthwrap input{width:84px;height:46px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font-size:16px;font-family:inherit;background:var(--surface)}
@@ -128,7 +131,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-2d';
+var BUILD='KIDS-3a';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};
@@ -170,9 +173,14 @@ function reconcile(){
     if(s==='incomplete'){c[5]='todo';}
     else if((s==='done'||s==='skip'||s==='wait')&&c[13]!==t){c[5]='todo';c[13]='';}
     else if(s==='wait'||s==='skipwait'){
-      /* a chore marked done/skipped today MUST have a matching approval — rebuild it if it was lost */
-      var ha=false;for(var j=0;j<ap.length;j++){if(ap[j].ci===i&&(!ap[j].date||ap[j].date===t)){ha=true;break;}}
-      if(!ha){if(c[13]===t){ap.push({title:c[3],desc:c[7],who:c[0],color:c[1],amt:(s==='skipwait'?0:payAmt(c[4])),ci:i,date:t,skip:(s==='skipwait')});}else{c[5]='todo';c[13]='';}}
+      if(c[13]===t){
+        /* marked today: make sure it has an approval record */
+        var ha=false;for(var j=0;j<ap.length;j++){if(ap[j].ci===i&&ap[j].date===t){ha=true;break;}}
+        if(!ha)ap.push({title:c[3],desc:c[7],who:c[0],color:c[1],amt:(s==='skipwait'?0:payAmt(c[4])),ci:i,date:t,skip:(s==='skipwait')});
+      }else{
+        /* marked on a PRIOR day: today's row goes back to To-Do, the old approval stays pending */
+        c[5]='todo';c[13]='';
+      }
     }
   }
 }
@@ -377,14 +385,31 @@ function approveBank(i){
 }
 function declineBank(i){var r=BREQ()[i];if(!r)return;BREQ().splice(i,1);save();render();toast('Request declined · no money moved');}
 /* every chore the kids marked done/skipped today = the pending list (single source of truth) */
-function pendingChores(){var t=todayYMD(),out=[],list=CH();
-  for(var i=0;i<list.length;i++){var c=list[i];if(!c)continue;
-    if((c[5]==='wait'||c[5]==='skipwait')&&(!c[13]||c[13]===t))out.push({i:i,c:c});}
+function pendingChores(){var ap=AP(),out=[];
+  for(var k=0;k<ap.length;k++){if(ap[k]&&ap[k].ci!=null)out.push({k:k,a:ap[k]});}
+  out.sort(function(x,y){return String(y.a.date||'').localeCompare(String(x.a.date||''));});
   return out;}
+function dayLabel(d){var t=todayYMD();if(!d)return '';if(d===t)return 'Today';
+  var p=(''+d).split('-'),dt=new Date(+p[0],+p[1]-1,+p[2]);
+  var y=new Date();y.setDate(y.getDate()-1);
+  if(d===(y.getFullYear()+'-'+pad2(y.getMonth()+1)+'-'+pad2(y.getDate())))return 'Yesterday';
+  try{return dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}catch(e){return d;}}
 function approvedToday(){var t=todayYMD(),out=[],list=CH();
   for(var i=0;i<list.length;i++){var c=list[i];if(!c)continue;
     if((c[5]==='done'||c[5]==='skip')&&c[13]===t)out.push({i:i,c:c});}
   return out;}
+function approveAt(k){var a=AP()[k];if(!a)return;var t=todayYMD();
+  var isSkip=!!a.skip,amt=isSkip?0:(Number(a.amt)||0),kid=a.who,b=BAL()[kid],tx=TX()[kid],c=CH()[a.ci];
+  if(!isSkip&&b&&amt>0){b.bal+=amt;b.wk=(b.wk||0)+amt;if(tx)tx.unshift([a.title+(a.date===t?'':' ('+dayLabel(a.date)+')'),txDate(),amt]);}
+  /* only stamp the chore row when the approval is for TODAY — an older day must not clear today's chore */
+  if(c&&a.date===t&&(c[5]==='wait'||c[5]==='skipwait')){c[5]=isSkip?'skip':'done';c[13]=t;}
+  AP().splice(k,1);save();render();toast((isSkip?'Skip allowed':'Approved \u00b7 +'+money(amt))+' \u00b7 '+dayLabel(a.date));}
+function rejectAt(k){var a=AP()[k];if(!a)return;var t=todayYMD(),c=CH()[a.ci];
+  if(c&&a.date===t&&(c[5]==='wait'||c[5]==='skipwait')){c[5]='incomplete';c[11]=0;c[13]='';}
+  var ttl=a.title,ci=(a.ci==null?-1:a.ci),isSkip=!!a.skip;
+  AP().splice(k,1);save();render();
+  sheetHTML('<h3>Add chore back in?</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">'+(isSkip?'Skip denied.':'Rejected \u2014 no money moved.')+' Put "'+ttl+'" back on the list so they still do it?</div>'
+    +'<div class="row2"><button class="b-ghost" onclick="skipDenyBack('+ci+',false)">No</button><button class="b-green" onclick="skipDenyBack('+ci+',true)">Yes, add it back</button></div>');}
 function approveChoreAt(i){var c=CH()[i];if(!c)return;var t=todayYMD();
   var isSkip=(c[5]==='skipwait'),amt=isSkip?0:payAmt(c[4]),kid=c[0],b=BAL()[kid],tx=TX()[kid];
   if(!isSkip&&b&&amt>0){b.bal+=amt;b.wk=(b.wk||0)+amt;if(tx)tx.unshift([c[3],txDate(),amt]);}
@@ -407,19 +432,21 @@ function bankAppView(){
   var reqs=BREQ();
   var tot=reqs.length+pendingChores().length;
   var out='<div style="margin-bottom:14px"><div style="font-size:22px;font-weight:800;line-height:1">Approvals</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+(tot?tot+' waiting':'Nothing waiting')+'</div></div>';
-  /* --- chore approvals: derived straight from the chores, so they can never drift --- */
+  /* --- chore approvals: one record per chore per DAY, tagged with that day --- */
   var pend=pendingChores();
   out+='<div class="eyebrow" style="margin:2px 0 8px">Chores</div>';
   if(!pend.length){out+='<div class="card"><div class="in"><div class="empty">No chores waiting.</div></div></div>';}
   else{pend.forEach(function(o){
-    var c=o.c,i=o.i,isSkip=(c[5]==='skipwait'||c[5]==='skip'),amt=payAmt(c[4]);
-    out+='<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:10px"><span class="av" style="width:32px;height:32px;font-size:14px;background:'+(KIDCOL[c[0]]||c[1]||'#999')+'">'+esc((c[0]||'?')[0])+'</span>'
-      +'<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800">'+c[3]+'</div><div style="font-size:11.5px;color:var(--ink3)">'+esc(c[0])+(c[7]?' \u00b7 '+c[7]:'')+'</div></div>'
+    var a=o.a,k=o.k,isSkip=!!a.skip,amt=Number(a.amt)||0,who=a.who||'';
+    var lab=dayLabel(a.date),isToday=(a.date===todayYMD());
+    out+='<div class="card"><div class="in">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px"><span class="chip" style="font-size:11px;padding:5px 10px;'+(isToday?'background:var(--saget);color:var(--saged)':'background:var(--goldt);color:var(--goldd)')+'">'+esc(lab)+'</span>'
+      +(isToday?'':'<span style="font-size:11px;color:var(--ink3)">approving for that day</span>')+'</div>'
+      +'<div style="display:flex;align-items:center;gap:10px"><span class="av" style="width:32px;height:32px;font-size:14px;background:'+(KIDCOL[who]||a.color||'#999')+'">'+esc((who||'?')[0])+'</span>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800">'+a.title+'</div><div style="font-size:11.5px;color:var(--ink3)">'+esc(who)+(a.desc?' \u00b7 '+a.desc:'')+'</div></div>'
       +(isSkip?'<span class="chip skip" style="font-size:11px;padding:5px 9px">\u23ed Skip</span>':'<span class="pay" style="font-size:14px">'+money(amt)+'</span>')+'</div>'
-      +(isSkip
-        ?'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">Asking to skip today \u2014 no money either way.</div>'
-         +'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="rejectChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Deny</button><button onclick="approveChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Allow Skip</button></div>'
-        :'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="rejectChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Reject</button><button onclick="approveChoreAt('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Approve</button></div>')
+      +(isSkip?'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">Asking to skip \u2014 no money either way.</div>':'')
+      +'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="rejectAt('+k+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">'+(isSkip?'Deny':'Reject')+'</button><button onclick="approveAt('+k+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">'+(isSkip?'Allow Skip':'Approve')+'</button></div>'
       +'</div></div>';
   });}
   /* --- already approved today (so this page matches the chore list) --- */
@@ -521,7 +548,7 @@ function choreControl(c,i){
 function choreRow(c,i){
   var pay=c[4]?'<span class="pay">'+esc(c[4])+'</span>':'';
   var edit='<button class="editbtn" onclick="editChore('+i+')" aria-label="Edit"><svg viewBox="0 0 24 24"><path d="M5 19h3l9.5-9.5-3-3L5 16zM14.5 6.5l3 3"/></svg></button>';
-  return '<div class="chore" id="chore-'+i+'"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+'<span class="ctl" id="ctl-'+i+'">'+choreControl(c,i)+'</span>'+edit+'</div>';
+  return '<div class="chore" id="chore-'+i+'"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+(c[4]?'<div class="paylin">'+esc(c[4])+'</div>':'')+'</div><span class="ctl" id="ctl-'+i+'">'+choreControl(c,i)+'</span>'+edit+'</div>';
 }
 /* update ONE row in place — avoids a full re-render swallowing rapid taps */
 function refreshRow(i){
@@ -537,6 +564,11 @@ function refreshRow(i){
   return true;
 }
 function previewRow(c){var pay=c[4]?'<span class="pay">'+esc(c[4])+'</span>':'';return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+'</div>';}
+function clearAllChores(){gate('Enter the Hub Code to clear all chores',function(){
+  var n=CH().length;
+  confirmSheet('Remove all chores?','Delete all '+n+' chore'+(n===1?'':'s')+' and clear pending approvals. The boys\u2019 bank balances are NOT touched.',function(){
+    if(STATE){STATE.CHORES=[];STATE.APPROVALS=[];}
+    save();render();toast('All chores cleared \u2014 ready to rebuild \u2728');},'Remove all','b-red');});}
 function choresView(){
   var list=CH(),ap=AP();
   var DOW3=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -562,6 +594,7 @@ function choresView(){
       : '<div class="empty">'+(isToday?'No chores today. 🎉':'No chores on '+DOWfull[wd]+'.')+'</div>';
     out+='<div class="card"><div class="in"><div class="kidhead"><span class="av" style="background:'+col+'">'+esc(kid[0])+'</span><div class="kidname">'+esc(kid)+'</div><div class="kidbal">$'+dollars+'<span class="c">.'+cents+'</span></div></div></div><div class="in" style="padding-top:2px">'+inner+'</div></div>';
   });
+  if(isToday)out+='<div style="margin-top:4px"><button onclick="clearAllChores()" style="width:100%;height:44px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:14px">Remove All Chores &amp; Start Over</button></div>';
   return out;
 }
 

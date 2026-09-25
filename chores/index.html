@@ -464,19 +464,12 @@ function choresView(){
   ks.forEach(function(kid){
     var rows=[];
     for(var i=0;i<list.length;i++){var c=list[i];if(!c||c[0]!==kid)continue;var show=isToday?activeToday(c):scheduledOnWd(c,wd);if(show)rows.push(i);}
-    if(isToday)rows.sort(function(a,b){var pa=(list[a][5]==='done'||list[a][5]==='skip')?1:0,pb=(list[b][5]==='done'||list[b][5]==='skip')?1:0;return pa-pb;});
     var b=BAL()[kid]||{bal:0};
     var col=KIDCOL[kid]||'#999';
     var dollars=Math.floor(b.bal||0),cents=('0'+Math.round(((b.bal||0)-dollars)*100)).slice(-2);
-    var inner;
-    if(!rows.length){inner='<div class="empty">'+(isToday?'Nothing left today — nice work! 🎉':'No chores on '+DOWfull[wd]+'.')+'</div>';}
-    else if(!isToday){inner=rows.map(function(i){return previewRow(list[i]);}).join('');}
-    else{
-      var open=rows.filter(function(i){return list[i][5]==='todo';});
-      var fin=rows.filter(function(i){var s=list[i][5];return s==='wait'||s==='skipwait'||s==='done'||s==='skip'||s==='incomplete';});
-      inner=(open.length?open.map(function(i){return choreRow(list[i],i);}).join(''):'<div class="empty">Nothing left today — nice work! 🎉</div>')
-        +(fin.length?'<div class="eyebrow" style="margin:16px 0 2px;padding-top:10px;border-top:1px solid var(--line)">Finished today</div>'+fin.map(function(i){return choreRow(list[i],i);}).join(''):'');
-    }
+    var inner=rows.length
+      ? rows.map(function(i){return isToday?choreRow(list[i],i):previewRow(list[i]);}).join('')
+      : '<div class="empty">'+(isToday?'No chores today. 🎉':'No chores on '+DOWfull[wd]+'.')+'</div>';
     out+='<div class="card"><div class="in"><div class="kidhead"><span class="av" style="background:'+col+'">'+esc(kid[0])+'</span><div class="kidname">'+esc(kid)+'</div><div class="kidbal">$'+dollars+'<span class="c">.'+cents+'</span></div></div></div><div class="in" style="padding-top:2px">'+inner+'</div></div>';
   });
   return out;

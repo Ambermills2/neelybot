@@ -472,8 +472,8 @@ function choresView(){
     if(!rows.length){inner='<div class="empty">'+(isToday?'Nothing left today — nice work! 🎉':'No chores on '+DOWfull[wd]+'.')+'</div>';}
     else if(!isToday){inner=rows.map(function(i){return previewRow(list[i]);}).join('');}
     else{
-      var open=rows.filter(function(i){var s=list[i][5];return s==='todo'||s==='wait'||s==='skipwait';});
-      var fin=rows.filter(function(i){var s=list[i][5];return s==='done'||s==='skip'||s==='incomplete';});
+      var open=rows.filter(function(i){return list[i][5]==='todo';});
+      var fin=rows.filter(function(i){var s=list[i][5];return s==='wait'||s==='skipwait'||s==='done'||s==='skip'||s==='incomplete';});
       inner=(open.length?open.map(function(i){return choreRow(list[i],i);}).join(''):'<div class="empty">Nothing left today — nice work! 🎉</div>')
         +(fin.length?'<div class="eyebrow" style="margin:16px 0 2px;padding-top:10px;border-top:1px solid var(--line)">Finished today</div>'+fin.map(function(i){return choreRow(list[i],i);}).join(''):'');
     }

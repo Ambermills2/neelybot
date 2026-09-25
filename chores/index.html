@@ -132,7 +132,10 @@ function kids(){return Object.keys(BAL());}
 
 function choreDaysInfo(c){var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];var days=Array.isArray(c[9])?c[9]:[];var idxs=days.map(function(d){return DOW.indexOf(d);}).filter(function(x){return x>=0;});var win=c[10]||'Today Only';var m=String(win).match(/\d/);var span=m?parseInt(m[0],10):1;if(span<1)span=1;return {idxs:idxs,span:span};}
 function scheduledToday(c){var hasDays=Array.isArray(c[9])&&c[9].length>0;if(c[14]&&!hasDays){var n=new Date(),last=new Date(n.getFullYear(),n.getMonth()+1,0).getDate(),want=Math.min(c[14],last);return n.getDate()===want;}if(c[12]&&!hasDays)return c[12]===todayYMD();var info=choreDaysInfo(c);if(!info.idxs.length)return true;var t=(new Date().getDay()+6)%7;for(var k=0;k<info.idxs.length;k++){if(((t-info.idxs[k])+7)%7<info.span)return true;}return false;}
-function activeToday(c){return c[11]?true:scheduledToday(c);}
+function nextYMD(s){var p=(s||todayYMD()).split('-');var d=new Date(+p[0],+p[1]-1,+p[2]+1);return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+/* c[11] = the ONE extra date this chore was added back for (YMD). Legacy 1/true = today. */
+function carryDate(c){var v=c[11];if(!v)return '';if(v===1||v===true)return todayYMD();return String(v);}
+function activeToday(c){var cd=carryDate(c);if(cd&&cd===todayYMD())return true;return scheduledToday(c);}
 function scheduledOnWd(c,wd){var hasDays=Array.isArray(c[9])&&c[9].length>0;if(c[14]&&!hasDays)return false;if(c[12]&&!hasDays)return false;var info=choreDaysInfo(c);if(!info.idxs.length)return true;for(var k=0;k<info.idxs.length;k++){if(((wd-info.idxs[k])+7)%7<info.span)return true;}return false;}
 
 /* keep the view correct without depending on the wall tablet's nightly reset (same rules as the main app) */
@@ -295,10 +298,16 @@ function rejStep1(i,takeMoney){
   sheetHTML('<h3>Add chore back for next day?</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">Put "'+t+'" back on the list so they do it again?'+(takeMoney?'<br><span style="color:var(--red);font-weight:700">'+money(amt)+' was taken back.</span>':'')+'</div>'
     +'<div class="row2"><button class="b-ghost" onclick="rejStep2('+(ci==null?-1:ci)+',false)">No</button><button class="b-green" onclick="rejStep2('+(ci==null?-1:ci)+',true)">Yes, add it back</button></div>');}
 function skipDenyBack(ci,addBack){
-  if(ci>=0&&CH()[ci]){if(addBack){CH()[ci][5]='todo';CH()[ci][11]=1;CH()[ci][13]='';}else{CH()[ci][5]='incomplete';CH()[ci][11]=0;}}
+  if(ci>=0&&CH()[ci]){if(addBack){CH()[ci][5]='todo';CH()[ci][13]='';}else{CH()[ci][5]='incomplete';CH()[ci][11]=0;}}
   save();render();toast(addBack?'Added back to the list':'Left in Incomplete');showApprovals();}
+function addBackNextDay(c){var d=nextYMD(todayYMD());c[5]='todo';c[13]='';c[11]=scheduledOnYMD(c,d)?0:d;return d;}
+function scheduledOnYMD(c,ymdStr){var p=ymdStr.split('-');var dt=new Date(+p[0],+p[1]-1,+p[2]);var hasDays=Array.isArray(c[9])&&c[9].length>0;
+  if(c[14]&&!hasDays){var last=new Date(dt.getFullYear(),dt.getMonth()+1,0).getDate();return dt.getDate()===Math.min(c[14],last);}
+  if(c[12]&&!hasDays)return c[12]===ymdStr;
+  var info=choreDaysInfo(c);if(!info.idxs.length)return true;var wd=(dt.getDay()+6)%7;
+  for(var k=0;k<info.idxs.length;k++){if(((wd-info.idxs[k])+7)%7<info.span)return true;}return false;}
 function rejStep2(ci,addBack){
-  if(addBack&&ci>=0&&CH()[ci]){CH()[ci][5]='todo';CH()[ci][11]=1;CH()[ci][13]='';}
+  if(addBack&&ci>=0&&CH()[ci])addBackNextDay(CH()[ci]);
   save();render();toast(addBack?'Added back for next day':'Left in Incomplete');showApprovals();}
 function removeApproval(i){var ap=AP(),a=ap[i];if(!a)return;if(a.ci!=null&&CH()[a.ci]&&(CH()[a.ci][5]==='wait'||CH()[a.ci][5]==='skipwait'))CH()[a.ci][5]='todo';ap.splice(i,1);save();toast('Removed');showApprovals();render();}
 
@@ -342,9 +351,26 @@ function approveBank(i){
 }
 function declineBank(i){var r=BREQ()[i];if(!r)return;BREQ().splice(i,1);save();render();toast('Request declined · no money moved');}
 function bankAppView(){
-  var reqs=BREQ();
-  var out='<div style="margin-bottom:14px"><div style="font-size:22px;font-weight:800;line-height:1">Bank Approvals</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+(reqs.length?reqs.length+' request'+(reqs.length===1?'':'s')+' waiting':'Nothing waiting')+'</div></div>';
-  if(!reqs.length){out+='<div class="card"><div class="in"><div class="empty">No pending requests. 🎉</div></div></div>';return out;}
+  var reqs=BREQ(),ap=AP();
+  var tot=reqs.length+ap.length;
+  var out='<div style="margin-bottom:14px"><div style="font-size:22px;font-weight:800;line-height:1">Approvals</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+(tot?tot+' waiting':'Nothing waiting')+'</div></div>';
+  /* --- chore approvals --- */
+  out+='<div class="eyebrow" style="margin:2px 0 8px">Chores</div>';
+  if(!ap.length){out+='<div class="card"><div class="in"><div class="empty">No chores waiting.</div></div></div>';}
+  else{ap.forEach(function(a,i){
+    out+='<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:10px"><span class="av" style="width:32px;height:32px;font-size:14px;background:'+(KIDCOL[a.who]||a.color||'#999')+'">'+esc((a.who||'?')[0])+'</span>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800">'+a.title+'</div><div style="font-size:11.5px;color:var(--ink3)">'+esc(a.who)+(a.desc?' · '+a.desc:'')+'</div></div>'
+      +(a.skip?'<span class="chip skip" style="font-size:11px;padding:5px 9px">⏭ Skip</span>':'')+'</div>'
+      +(a.skip
+        ?'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">Asking to skip today — no money either way.</div>'
+         +'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="reject('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Deny</button><button onclick="approve('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Allow Skip</button></div>'
+        :'<div class="amtin"><span style="font-weight:800;color:var(--ink3)">$</span><input id="amt'+i+'" type="number" inputmode="decimal" step="0.01" min="0" value="'+(Number(a.amt)||0).toFixed(2)+'"><span style="font-size:12px;color:var(--ink3)">to add / remove</span></div>'
+         +'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="reject('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Reject</button><button onclick="approve('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Approve</button></div>')
+      +'</div></div>';
+  });}
+  /* --- bank requests --- */
+  out+='<div class="eyebrow" style="margin:18px 0 8px">Bank Requests</div>';
+  if(!reqs.length){out+='<div class="card"><div class="in"><div class="empty">No pending requests.</div></div></div>';return out;}
   reqs.forEach(function(r,i){
     var inn=r.dir==='in';
     out+='<div class="card"><div class="in">'
@@ -363,7 +389,7 @@ var _pin='',_pinCB=null;
 function gate(msg,cb){_pin='';_pinCB=cb;
   sheetHTML('<h3 style="text-align:center">Hub Code</h3><div style="text-align:center;color:var(--ink3);font-size:12.5px;margin-bottom:6px">'+esc(msg)+'</div>'
     +'<div class="dots" id="dots">'+[0,0,0,0].map(function(){return '<span class="dot"></span>';}).join('')+'</div>'
-    +'<div class="pad">'+[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(function(k){return k===''?'<span></span>':'<div class="key" onclick="pin(\''+(k==='⌫'?'del':k)+'\')">'+k+'</div>';}).join('')+'</div>'
+    +'<div class="pad">'+[1,2,3,4,5,6,7,8,9,'star',0,'⌫'].map(function(k){return k==='star'?'<div class="key" style="color:#9A958B;font-size:24px">★</div>':'<div class="key" onclick="pin(\''+(k==='⌫'?'del':k)+'\')">'+k+'</div>';}).join('')+'</div>'
     +'<div class="row2" style="margin-top:16px"><button class="b-ghost" onclick="closeSheet()">Cancel</button></div>');
 }
 function pin(k){
@@ -400,7 +426,7 @@ function render(){
   }
   if(!STATE){body='<div class="stage"><div class="card"><div class="in"><div class="empty">Loading your chores…</div></div></div></div>';app.innerHTML=head+body;return;}
   body='<div class="stage">'+(TAB==='chores'?choresView():TAB==='bankapp'?bankAppView():bankView())+'<div class="build">Build '+BUILD+'</div></div>';
-  var nreq=BREQ().length;
+  var nreq=BREQ().length+AP().length;
   var nav='<div class="nav"><a href="javascript:void(0)" onclick="go(\'chores\')" class="'+(TAB==='chores'?'on':'')+'">'+ic('check')+'Chores</a>'
     +'<a href="javascript:void(0)" onclick="go(\'bank\')" class="'+(TAB==='bank'?'on':'')+'">'+ic('bank')+'Bank</a>'
     +'<a href="javascript:void(0)" onclick="openBankTab()" class="'+(TAB==='bankapp'?'on':'')+'" style="position:relative">'+ic('lock')+'Approvals'+(nreq?'<span style="position:absolute;top:0;right:22%;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#C0553D;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+(nreq>9?'9+':nreq)+'</span>':'')+'</a></div>';
@@ -433,7 +459,7 @@ function choresView(){
   var out='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:22px;font-weight:800;line-height:1">'+title+'</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+sub+'</div></div><button onclick="addChore()" style="height:44px;padding:0 16px;background:var(--sage);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;flex:none">+ Add</button></div>';
   var dchips=[{v:-1,l:'Today'}];for(var d=0;d<7;d++)dchips.push({v:d,l:DOW3[d]});
   out+='<div class="dayfilter">'+dchips.map(function(c){return '<span class="dchip'+((VIEWDAY===c.v)?' on':'')+'" onclick="setViewDay('+c.v+')">'+c.l+'</span>';}).join('')+'</div>';
-  if(isToday&&ap.length){out+='<div class="banner"><span class="n">'+ap.length+'</span><div><b>'+ap.length+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openApprovals()">Review</span></div>';}
+  if(isToday&&ap.length){out+='<div class="banner"><span class="n">'+ap.length+'</span><div><b>'+ap.length+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openBankTab()">Review</span></div>';}
   var ks=kids();if(!ks.length)ks=['Caden','Gavin'];
   ks.forEach(function(kid){
     var rows=[];
@@ -442,7 +468,15 @@ function choresView(){
     var b=BAL()[kid]||{bal:0};
     var col=KIDCOL[kid]||'#999';
     var dollars=Math.floor(b.bal||0),cents=('0'+Math.round(((b.bal||0)-dollars)*100)).slice(-2);
-    var inner=rows.length?rows.map(function(i){return isToday?choreRow(list[i],i):previewRow(list[i]);}).join(''):'<div class="empty">'+(isToday?'Nothing left today — nice work! 🎉':'No chores on '+DOWfull[wd]+'.')+'</div>';
+    var inner;
+    if(!rows.length){inner='<div class="empty">'+(isToday?'Nothing left today — nice work! 🎉':'No chores on '+DOWfull[wd]+'.')+'</div>';}
+    else if(!isToday){inner=rows.map(function(i){return previewRow(list[i]);}).join('');}
+    else{
+      var open=rows.filter(function(i){var s=list[i][5];return s==='todo'||s==='wait'||s==='skipwait';});
+      var fin=rows.filter(function(i){var s=list[i][5];return s==='done'||s==='skip'||s==='incomplete';});
+      inner=(open.length?open.map(function(i){return choreRow(list[i],i);}).join(''):'<div class="empty">Nothing left today — nice work! 🎉</div>')
+        +(fin.length?'<div class="eyebrow" style="margin:16px 0 2px;padding-top:10px;border-top:1px solid var(--line)">Finished today</div>'+fin.map(function(i){return choreRow(list[i],i);}).join(''):'');
+    }
     out+='<div class="card"><div class="in"><div class="kidhead"><span class="av" style="background:'+col+'">'+esc(kid[0])+'</span><div class="kidname">'+esc(kid)+'</div><div class="kidbal">$'+dollars+'<span class="c">.'+cents+'</span></div></div></div><div class="in" style="padding-top:2px">'+inner+'</div></div>';
   });
   return out;

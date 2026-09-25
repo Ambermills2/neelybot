@@ -133,7 +133,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-4d';
+var BUILD='KIDS-4e';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#7E5A9B',Ryan:'#B8453C'};
@@ -182,6 +182,12 @@ function sweepUndone(){
   if(changed)save();
   return changed;
 }
+function weekStart(){var d=new Date();var off=(d.getDay()+6)%7;d.setDate(d.getDate()-off);return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+/* "this week" is earnings since Monday — reset the counters when a new week starts */
+function rollWeek(){if(!STATE)return false;var ws=weekStart();
+  if(STATE.WEEKSTART===ws)return false;
+  var bal=BAL();Object.keys(bal).forEach(function(k){if(bal[k])bal[k].wk=0;});
+  STATE.WEEKSTART=ws;save();return true;}
 function reconcile(){
   if(!STATE||!STATE.CHORES)return;
   var t=todayYMD(),list=STATE.CHORES,ap=STATE.APPROVALS||[];
@@ -223,7 +229,7 @@ function subscribe(){
     var data=snap.data();_synced=true;
     if(_dirty)return; // don't clobber an unsaved local edit
     if(data&&data.stateJson){try{STATE=JSON.parse(data.stateJson);}catch(e){}}
-    reconcile();sweepUndone();render();
+    rollWeek();reconcile();sweepUndone();render();
   },function(err){console.warn('snapshot',err);});
 }
 function signIn(){if(!_ready){toast('Still loading…');return;}var p=new firebase.auth.GoogleAuthProvider();fbAuth.signInWithPopup(p).catch(function(e){if(e&&e.code!=='auth/popup-closed-by-user')toast('Sign-in did not finish');});}
@@ -450,7 +456,7 @@ function undoUndone(k){var a=AP()[k];if(!a)return;var ci=(a.ci==null?-1:a.ci),c=
   save();render();toast('Removed from approvals');}
 function approveAt(k){var a=AP()[k];if(!a)return;var t=todayYMD();
   var isSkip=!!a.skip,amt=isSkip?0:(Number(a.amt)||0),kid=a.who,b=BAL()[kid],tx=TX()[kid],c=CH()[a.ci];
-  if(!isSkip&&b&&amt>0){b.bal+=amt;b.wk=(b.wk||0)+amt;if(tx)tx.unshift([a.title+(a.date===t?'':' ('+dayLabel(a.date)+')'),txDate(),amt]);}
+  if(!isSkip&&b&&amt>0){b.bal+=amt;b.wk=(b.wk||0)+amt;if(tx)tx.unshift([a.title+(a.date===t?'':' ('+dayLabel(a.date)+')'),txDate(),amt,todayYMD()]);}
   /* only stamp the chore row when the approval is for TODAY — an older day must not clear today's chore */
   if(c&&a.date===t&&(c[5]==='wait'||c[5]==='skipwait')){c[5]=isSkip?'skip':'done';c[13]=t;}
   AP().splice(k,1);
@@ -534,6 +540,21 @@ function bankAppView(){
   return out;
 }
 
+function fixBalance(kid){gate('Enter the Hub Code to correct the balance',function(){
+  var b=BAL()[kid]||{bal:0};
+  sheetHTML('<h3>Correct '+esc(kid)+'\u2019s balance</h3>'
+    +'<div style="font-size:13px;color:var(--ink3);margin-bottom:10px">Currently '+money(b.bal||0)+'. Enter what it should actually be \u2014 this sets it exactly and logs the difference.</div>'
+    +'<input id="fbAmt" class="fld" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" value="'+(Number(b.bal)||0).toFixed(2)+'">'
+    +'<label style="display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink2);margin:4px 0 6px"><input id="fbWk" type="checkbox" checked style="width:20px;height:20px"> Also reset \u201cthis week\u201d to $0</label>'
+    +'<div class="row2"><button class="b-ghost" onclick="closeSheet()">Cancel</button><button class="b-green" onclick="saveFixBalance(\''+kid+'\')">Set Balance</button></div>');
+  setTimeout(function(){var e=document.getElementById('fbAmt');if(e){e.focus();e.select();}},60);});}
+function saveFixBalance(kid){var b=BAL()[kid];if(!b){closeSheet();return;}
+  var v=parseFloat((document.getElementById('fbAmt')||{}).value);if(isNaN(v)||v<0){toast('Enter an amount');return;}
+  var wk=(document.getElementById('fbWk')||{}).checked;
+  var diff=+(v-(b.bal||0)).toFixed(2);
+  b.bal=v;if(wk)b.wk=0;
+  if(diff!==0){var tx=TX()[kid];if(tx)tx.unshift(['Balance correction',txDate(),diff,todayYMD()]);}
+  save();closeSheet();render();toast(kid+' set to '+money(v));}
 /* ---------- hub code gate ---------- */
 var _pin='',_pinCB=null;
 function gate(msg,cb){_pin='';_pinCB=cb;
@@ -687,6 +708,7 @@ function bankView(){
     out+='<div class="card"><div class="in"><div class="kidhead"><span class="av" style="background:'+col+'">'+esc(kid[0])+'</span><div class="kidname">'+esc(kid)+'</div><div class="kidbal">$'+dollars+'<span class="c">.'+cents+'</span></div></div>'
       +'<div style="font-size:12px;color:var(--saged);font-weight:800;margin-top:2px">+'+money(b.wk||0)+' this week</div>'
       +'<div class="moneybtns"><button onclick="bankMove(\''+kid+'\',\'in\')">▲ Deposit</button><button onclick="bankMove(\''+kid+'\',\'out\')">▼ Withdraw</button></div>'
+      +'<div style="text-align:right;margin-top:8px"><span onclick="fixBalance(\''+kid+'\')" style="font-size:12px;font-weight:800;color:var(--ink3);cursor:pointer;text-decoration:underline">Correct balance</span></div>'
       +'<div class="eyebrow" style="margin:16px 0 2px">Recent</div>'+txhtml
       +(allTx.length>lim?'<div style="text-align:center;padding:12px 0 2px"><span onclick="moreTx(\''+esc(kid)+'\')" style="font-size:13.5px;font-weight:800;color:var(--saged);cursor:pointer">Show more ('+(allTx.length-lim)+' more)</span></div>':'')
       +(lim>8&&allTx.length>8?'<div style="text-align:center;padding:4px 0 2px"><span onclick="lessTx(\''+esc(kid)+'\')" style="font-size:12.5px;font-weight:700;color:var(--ink3);cursor:pointer">Show less</span></div>':'')
@@ -698,7 +720,7 @@ function bankView(){
 /* ---------- boot ---------- */
 render();
 fbInit();
-setInterval(function(){if(sweepUndone())render();},60000);
+setInterval(function(){var a=rollWeek(),b=sweepUndone();if(a||b)render();},60000);
 </script>
 </body>
 </html>

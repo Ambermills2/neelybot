@@ -148,7 +148,11 @@ function reconcile(){
     var s=c[5];
     if(s==='incomplete'){c[5]='todo';}
     else if((s==='done'||s==='skip'||s==='wait')&&c[13]!==t){c[5]='todo';c[13]='';}
-    else if(s==='wait'){var ha=false;for(var j=0;j<ap.length;j++){if(ap[j].ci===i&&(!ap[j].date||ap[j].date===t)){ha=true;break;}}if(!ha){c[5]='todo';c[13]='';}}
+    else if(s==='wait'||s==='skipwait'){
+      /* a chore marked done/skipped today MUST have a matching approval — rebuild it if it was lost */
+      var ha=false;for(var j=0;j<ap.length;j++){if(ap[j].ci===i&&(!ap[j].date||ap[j].date===t)){ha=true;break;}}
+      if(!ha){if(c[13]===t){ap.push({title:c[3],desc:c[7],who:c[0],color:c[1],amt:(s==='skipwait'?0:payAmt(c[4])),ci:i,date:t,skip:(s==='skipwait')});}else{c[5]='todo';c[13]='';}}
+    }
   }
 }
 
@@ -342,7 +346,7 @@ function doBankMove(kid,dir){
 }
 /* ---------- bank approvals ---------- */
 var _bankUnlocked=false;
-function openBankTab(){if(_bankUnlocked){TAB='bankapp';render();return;}gate('Enter the Hub Code for Bank Approvals',function(){_bankUnlocked=true;TAB='bankapp';render();});}
+function openBankTab(){if(_bankUnlocked){TAB='bankapp';pushNav();render();return;}gate('Enter the Hub Code for Approvals',function(){_bankUnlocked=true;TAB='bankapp';pushNav();render();});}
 function approveBank(i){
   var r=BREQ()[i];if(!r)return;
   var b=BAL()[r.kid],tx=TX()[r.kid];
@@ -402,7 +406,7 @@ function pin(k){
 }
 
 /* ---------- generic sheet / confirm / toast ---------- */
-function sheetHTML(h){document.getElementById('sheet').innerHTML=h;document.getElementById('modal').classList.add('show');}
+function sheetHTML(h){var m=document.getElementById('modal');var wasOpen=m.classList.contains('show');document.getElementById('sheet').innerHTML=h;m.classList.add('show');if(!wasOpen&&typeof pushNav==='function')pushNav();}
 function closeSheet(){document.getElementById('modal').classList.remove('show');}
 var _confCB=null;
 function confirmSheet(title,msg,cb,label,cls){_confCB=cb;sheetHTML('<h3>'+title+'</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">'+msg+'</div><div class="row2"><button class="b-ghost" onclick="closeSheet()">Cancel</button><button class="'+(cls||'b-red')+'" onclick="runConfirm()">'+(label||'Yes')+'</button></div>');}
@@ -413,7 +417,16 @@ document.getElementById('modal').addEventListener('click',function(e){if(e.targe
 
 /* ---------- render ---------- */
 function ic(name){var p={home:'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10',check:'M5 4.5h14v16H5zM9 4.5a3 3 0 0 1 6 0M8.5 12.5l2 2 4-4.5',bank:'M4 9 12 4l8 5M5 9v9h14V9M9 18v-5h6v5',lock:'M5 10.5h14v9H5zM8 10.5V8a4 4 0 0 1 8 0v2.5'}[name]||'';return '<svg viewBox="0 0 24 24"><path d="'+p+'"/></svg>';}
-function go(t){TAB=t;render();document.querySelector('.stage').scrollTop=0;}
+function go(t){TAB=t;pushNav();render();var s=document.querySelector('.stage');if(s)s.scrollTop=0;}
+/* --- back-button handling: never exit the app from a sheet or a sub-tab --- */
+function pushNav(){try{history.pushState({nb:1,tab:TAB},'');}catch(e){}}
+window.addEventListener('popstate',function(){
+  var m=document.getElementById('modal');
+  if(m&&m.classList.contains('show')){closeSheet();pushNav();return;}   // Back closes an open sheet
+  if(TAB!=='chores'){TAB='chores';render();pushNav();return;}           // Back returns to Chores
+  pushNav();                                                            // stay in the app
+});
+try{history.replaceState({nb:1,tab:'chores'},'');history.pushState({nb:1,tab:'chores'},'');}catch(e){}
 function setViewDay(d){VIEWDAY=d;render();var st=document.querySelector('.stage');if(st)st.scrollTop=0;}
 
 function render(){

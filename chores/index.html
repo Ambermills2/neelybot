@@ -42,6 +42,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 .done-btn:active{transform:scale(.96)}
 .chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:800;padding:9px 13px;border-radius:11px;flex:none}
 .chip.done{color:var(--saged);border:1.5px solid var(--sage);background:none}
+.chip.paid{color:#fff;background:var(--saged);border:1.5px solid var(--saged)}
 .chip.wait{color:var(--goldd);background:var(--goldt)}
 .chip.skip{color:var(--gray);background:var(--grayt)}
 .chip.inc{color:var(--red);background:var(--redt)}
@@ -127,7 +128,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-2c';
+var BUILD='KIDS-2d';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};
@@ -510,9 +511,10 @@ function render(){
 }
 
 function choreControl(c,i){
-  if(c[5]==='wait')return '<span class="chip done" onclick="unComplete('+i+')" title="Tap to undo">✓ Done</span>';
-  if(c[5]==='done')return '<span class="chip done" onclick="undoDone('+i+')" title="Tap to undo">✓ Done</span>';
-  if(c[5]==='skipwait'||c[5]==='skip')return '<span class="chip skip" onclick="unskip('+i+')" title="Tap to undo">⏭ Skipped</span>';
+  if(c[5]==='wait')return '<span class="chip done" onclick="unComplete('+i+')" title="Waiting on your approval">✓ Done</span>';
+  if(c[5]==='done')return '<span class="chip paid" onclick="undoDone('+i+')" title="Approved and paid">✓ Paid</span>';
+  if(c[5]==='skipwait')return '<span class="chip done" onclick="unskip('+i+')" title="Waiting on your approval">⏭ Skip</span>';
+  if(c[5]==='skip')return '<span class="chip paid" onclick="unskip('+i+')" title="Skip approved">⏭ Skipped</span>';
   if(c[5]==='incomplete')return '<span class="chip inc">Missed</span>';
   return '<button class="skip-x" onclick="skip('+i+')">Skip</button><button class="done-btn btn" onclick="complete('+i+')">✓ Done</button>';
 }

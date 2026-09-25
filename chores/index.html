@@ -133,7 +133,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-4c';
+var BUILD='KIDS-4d';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#7E5A9B',Ryan:'#B8453C'};
@@ -427,6 +427,27 @@ function undoApproval(n){var l=LOG(),e=l[n];if(!e)return;
     if(c&&e.stamped&&(c[5]==='done'||c[5]==='skip')){c[5]=e.skip?'skipwait':'wait';c[13]=e.date;}
     AP().push({title:e.title,desc:e.desc,who:kid,color:e.color,amt:e.amt,ci:e.ci,date:e.date,skip:e.skip});
     l.splice(n,1);save();render();toast('Undone \u00b7 back to waiting');},'Undo','b-red');}
+/* an auto-flagged Undone chore: Ok -> (take money? ) -> (add to next day?) ; Undo -> just clear it */
+function okUndone(k){var a=AP()[k];if(!a)return;
+  var kid=a.who,amt=Number(a.amt)||0,ci=(a.ci==null?-1:a.ci),ttl=a.title,d=a.date,b=BAL()[kid];
+  AP().splice(k,1);
+  var c=CH()[ci];if(c&&(c[5]==='wait'||c[5]==='skipwait')&&c[13]===d){c[5]='incomplete';c[13]='';c[11]=0;}
+  save();render();
+  var canMoney=(amt>0&&b);
+  if(!canMoney){askAddNextDay(ci,ttl);return;}
+  sheetHTML('<h3>Remove money from account?</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">"'+ttl+'" was not done. Take '+money(amt)+' out of '+esc(kid)+'\u2019s account?</div>'
+    +'<div class="row2"><button class="b-ghost" onclick="undoneMoney('+ci+',0,\''+String(kid).replace(/'/g,"")+'\','+amt+',\''+String(ttl).replace(/'/g,"")+'\')">No</button><button class="b-red" onclick="undoneMoney('+ci+',1,\''+String(kid).replace(/'/g,"")+'\','+amt+',\''+String(ttl).replace(/'/g,"")+'\')">Yes, take '+money(amt)+'</button></div>');}
+function undoneMoney(ci,take,kid,amt,ttl){
+  if(take){var b=BAL()[kid],tx=TX()[kid];if(b){b.bal-=amt;b.wk=Math.max(0,(b.wk||0)-amt);if(tx)tx.unshift(['Missed chore \u00b7 '+ttl,txDate(),-amt]);}save();render();toast('\u2212'+money(amt)+' from '+kid);}
+  askAddNextDay(ci,ttl);}
+function askAddNextDay(ci,ttl){
+  sheetHTML('<h3>Add to next day?</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">Put "'+ttl+'" back on the list so they still have to do it?</div>'
+    +'<div class="row2"><button class="b-ghost" onclick="closeSheet()">No</button><button class="b-green" onclick="doAddNextDay('+ci+')">Yes, add it</button></div>');}
+function doAddNextDay(ci){var c=CH()[ci];if(c){var d=addBackNextDay(c);save();render();closeSheet();toast('Added for '+dayLabel(d));}else{closeSheet();}}
+function undoUndone(k){var a=AP()[k];if(!a)return;var ci=(a.ci==null?-1:a.ci),c=CH()[ci];
+  AP().splice(k,1);
+  if(c&&(c[5]==='wait'||c[5]==='skipwait')&&c[13]===a.date){c[5]='todo';c[13]='';}
+  save();render();toast('Removed from approvals');}
 function approveAt(k){var a=AP()[k];if(!a)return;var t=todayYMD();
   var isSkip=!!a.skip,amt=isSkip?0:(Number(a.amt)||0),kid=a.who,b=BAL()[kid],tx=TX()[kid],c=CH()[a.ci];
   if(!isSkip&&b&&amt>0){b.bal+=amt;b.wk=(b.wk||0)+amt;if(tx)tx.unshift([a.title+(a.date===t?'':' ('+dayLabel(a.date)+')'),txDate(),amt]);}
@@ -478,7 +499,9 @@ function bankAppView(){
       +'<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800">'+a.title+'</div><div style="font-size:11.5px;color:var(--ink3)">'+esc(who)+(a.desc?' \u00b7 '+a.desc:'')+'</div></div>'
       +(isSkip?'<span class="chip skip" style="font-size:11px;padding:5px 9px">\u23ed Skip</span>':'<span class="pay" style="font-size:14px">'+money(amt)+'</span>')+'</div>'
       +(isSkip?'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">Asking to skip \u2014 no money either way.</div>':'')
-      +'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="rejectAt('+k+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">'+(isSkip?'Deny':'Reject')+'</button><button onclick="approveAt('+k+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">'+(isSkip?'Allow Skip':'Approve')+'</button></div>'
+      +(a.undone
+        ?'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="undoUndone('+k+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--line);background:none;color:var(--ink2);font-weight:800;font-size:15px">Undo</button><button onclick="okUndone('+k+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Ok</button></div>'
+        :'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="rejectAt('+k+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">'+(isSkip?'Deny':'Reject')+'</button><button onclick="approveAt('+k+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">'+(isSkip?'Allow Skip':'Approve')+'</button></div>')
       +'</div></div>';
   });}
   /* --- recently approved: Undo sits inline next to each chore --- */

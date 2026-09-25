@@ -186,10 +186,11 @@ function save(){
 }
 
 /* ---------- chore actions ---------- */
-function complete(i){var list=CH(),c=list[i];if(!c||c[5]!=='todo')return;var ap=AP(),t=todayYMD();for(var k=ap.length-1;k>=0;k--){if(ap[k].ci===i&&(!ap[k].date||ap[k].date===t))ap.splice(k,1);}c[5]='wait';c[13]=t;ap.push({title:c[3],desc:c[7],who:c[0],color:c[1],amt:payAmt(c[4]),ci:i,date:t});save();render();toast(c[3]+' → waiting for approval ⏳');}
+function complete(i){var list=CH(),c=list[i];if(!c||c[5]!=='todo')return;var ap=AP(),t=todayYMD();for(var k=ap.length-1;k>=0;k--){if(ap[k].ci===i&&(!ap[k].date||ap[k].date===t))ap.splice(k,1);}c[5]='wait';c[13]=t;ap.push({title:c[3],desc:c[7],who:c[0],color:c[1],amt:payAmt(c[4]),ci:i,date:t});save();if(!refreshRow(i))render();toast(c[3]+' ✓');}
+function unComplete(i){var c=CH()[i];if(!c||c[5]!=='wait')return;for(var k=AP().length-1;k>=0;k--){if(AP()[k].ci===i&&!AP()[k].skip)AP().splice(k,1);}c[5]='todo';c[13]='';save();if(!refreshRow(i))render();toast('Undone — back to To-Do');}
 function undoDone(i){var c=CH()[i];if(!c||c[5]!=='done')return;var kid=c[0],amt=payAmt(c[4]),b=BAL()[kid];confirmSheet('Un-do "'+esc(c[3])+'"?',(amt>0&&b?'It goes back to To-Do and '+money(amt)+' is taken back from '+esc(kid)+'.':'It goes back to To-Do.'),function(){c[5]='todo';c[13]='';if(amt>0&&b){b.bal-=amt;b.wk=Math.max(0,(b.wk||0)-amt);var tx=TX()[kid];if(tx)tx.unshift(['Undo · '+c[3],txDate(),-amt]);}save();render();toast('Undone'+(amt>0&&b?' · −'+money(amt):''));},'Undo','b-red');}
-function skip(i){var c=CH()[i];if(!c||c[5]!=='todo')return;var ap=AP(),t=todayYMD();for(var k=ap.length-1;k>=0;k--){if(ap[k].ci===i&&(!ap[k].date||ap[k].date===t))ap.splice(k,1);}c[5]='skipwait';c[13]=t;ap.push({title:c[3],desc:c[7],who:c[0],color:c[1],amt:0,ci:i,date:t,skip:true});save();render();toast(c[3]+' → skip sent for approval ⏭');}
-function unskip(i){var c=CH()[i];if(!c||(c[5]!=='skip'&&c[5]!=='skipwait'))return;c[5]='todo';c[13]='';for(var k=AP().length-1;k>=0;k--){if(AP()[k].ci===i&&AP()[k].skip)AP().splice(k,1);}save();render();toast('Un-skipped');}
+function skip(i){var c=CH()[i];if(!c||c[5]!=='todo')return;var ap=AP(),t=todayYMD();for(var k=ap.length-1;k>=0;k--){if(ap[k].ci===i&&(!ap[k].date||ap[k].date===t))ap.splice(k,1);}c[5]='skipwait';c[13]=t;ap.push({title:c[3],desc:c[7],who:c[0],color:c[1],amt:0,ci:i,date:t,skip:true});save();if(!refreshRow(i))render();toast(c[3]+' ⏭ skip sent');}
+function unskip(i){var c=CH()[i];if(!c||(c[5]!=='skip'&&c[5]!=='skipwait'))return;c[5]='todo';c[13]='';for(var k=AP().length-1;k>=0;k--){if(AP()[k].ci===i&&AP()[k].skip)AP().splice(k,1);}save();if(!refreshRow(i))render();toast('Un-skipped');}
 
 /* ---------- add chore ---------- */
 function lbl(t){return '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3);margin:12px 0 5px">'+t+'</div>';}
@@ -266,14 +267,14 @@ function showApprovals(){
       +(a.skip
         ?'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">Asking to skip today — no money either way.</div>'
          +'<div class="acts"><button onclick="reject('+i+')" style="border:1.5px solid var(--red);background:none;color:var(--red)">Deny</button><button onclick="approve('+i+')" class="b-green">Allow Skip</button></div>'
-        :'<div class="amtin"><span style="font-weight:800;color:var(--ink3)">$</span><input id="amt'+i+'" type="number" inputmode="decimal" step="0.01" min="0" value="'+(Number(a.amt)||0).toFixed(2)+'"><span style="font-size:12px;color:var(--ink3)">to add / remove</span></div>'
+        :'<div class="amtin"><span class="pay" style="font-size:14px">'+money(a.amt)+'</span></div>'
          +'<div class="acts"><button onclick="reject('+i+')" style="border:1.5px solid var(--red);background:none;color:var(--red)">Reject</button><button onclick="approve('+i+')" class="b-green">Approve</button></div>')
       +'</div>';
   });
   body+='<div class="row2"><button class="b-ghost" onclick="closeSheet()">Done</button></div>';
   sheetHTML(body);
 }
-function _amt(i,a){var el=document.getElementById('amt'+i);return parseFloat(el?el.value:a.amt)||0;}
+function _amt(i,a){return Number(a&&a.amt)||0;}
 function approve(i){var ap=AP(),a=ap[i];if(!a)return;
   if(a.skip){if(a.ci!=null&&CH()[a.ci]&&(!a.date||a.date===todayYMD())){CH()[a.ci][5]='skip';CH()[a.ci][13]=a.date||todayYMD();}ap.splice(i,1);save();toast('Skip approved · no money change ⏭');showApprovals();render();return;}
   var amt=_amt(i,a),b=BAL()[a.who];if(a.ci!=null&&CH()[a.ci]&&(!a.date||a.date===todayYMD())){CH()[a.ci][5]='done';CH()[a.ci][13]=a.date||todayYMD();}if(b){b.bal+=amt;b.wk=(b.wk||0)+amt;var tx=TX()[a.who];if(tx)tx.unshift([a.title,txDate(),amt]);}ap.splice(i,1);save();toast('Approved · +'+money(amt)+' to '+a.who+' 💰');showApprovals();render();}
@@ -360,12 +361,11 @@ function bankAppView(){
   else{ap.forEach(function(a,i){
     out+='<div class="card"><div class="in"><div style="display:flex;align-items:center;gap:10px"><span class="av" style="width:32px;height:32px;font-size:14px;background:'+(KIDCOL[a.who]||a.color||'#999')+'">'+esc((a.who||'?')[0])+'</span>'
       +'<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800">'+a.title+'</div><div style="font-size:11.5px;color:var(--ink3)">'+esc(a.who)+(a.desc?' · '+a.desc:'')+'</div></div>'
-      +(a.skip?'<span class="chip skip" style="font-size:11px;padding:5px 9px">⏭ Skip</span>':'')+'</div>'
+      +(a.skip?'<span class="chip skip" style="font-size:11px;padding:5px 9px">⏭ Skip</span>':'<span class="pay" style="font-size:14px">'+money(a.amt)+'</span>')+'</div>'
       +(a.skip
         ?'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">Asking to skip today — no money either way.</div>'
          +'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="reject('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Deny</button><button onclick="approve('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Allow Skip</button></div>'
-        :'<div class="amtin"><span style="font-weight:800;color:var(--ink3)">$</span><input id="amt'+i+'" type="number" inputmode="decimal" step="0.01" min="0" value="'+(Number(a.amt)||0).toFixed(2)+'"><span style="font-size:12px;color:var(--ink3)">to add / remove</span></div>'
-         +'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="reject('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Reject</button><button onclick="approve('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Approve</button></div>')
+        :'<div style="display:flex;gap:9px;margin-top:12px"><button onclick="reject('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Reject</button><button onclick="approve('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Approve</button></div>')
       +'</div></div>';
   });}
   /* --- bank requests --- */
@@ -429,22 +429,34 @@ function render(){
   var nreq=BREQ().length+AP().length;
   var nav='<div class="nav"><a href="javascript:void(0)" onclick="go(\'chores\')" class="'+(TAB==='chores'?'on':'')+'">'+ic('check')+'Chores</a>'
     +'<a href="javascript:void(0)" onclick="go(\'bank\')" class="'+(TAB==='bank'?'on':'')+'">'+ic('bank')+'Bank</a>'
-    +'<a href="javascript:void(0)" onclick="openBankTab()" class="'+(TAB==='bankapp'?'on':'')+'" style="position:relative">'+ic('lock')+'Approvals'+(nreq?'<span style="position:absolute;top:0;right:22%;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#C0553D;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+(nreq>9?'9+':nreq)+'</span>':'')+'</a></div>';
+    +'<a href="javascript:void(0)" onclick="openBankTab()" class="'+(TAB==='bankapp'?'on':'')+'" style="position:relative">'+ic('lock')+'Approvals'+'<span id="navBadge" style="position:absolute;top:0;right:22%;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#C0553D;color:#fff;font-size:10px;font-weight:800;'+(nreq?'display:flex':'display:none')+';align-items:center;justify-content:center">'+(nreq>9?'9+':nreq)+'</span></a></div>';
   app.innerHTML=head+body+nav;
 }
 
 function choreControl(c,i){
-  if(c[5]==='wait')return '<span class="chip wait">↩ Waiting</span>';
-  if(c[5]==='skipwait')return '<span class="chip wait" onclick="unskip('+i+')">⏭ Skip sent</span>';
-  if(c[5]==='done')return '<span class="chip done" onclick="undoDone('+i+')">✓ Done</span>';
-  if(c[5]==='skip')return '<span class="chip skip" onclick="unskip('+i+')">⏭ Skipped</span>';
+  if(c[5]==='wait')return '<span class="chip done" onclick="unComplete('+i+')" title="Tap to undo">✓ Done</span>';
+  if(c[5]==='done')return '<span class="chip done" onclick="undoDone('+i+')" title="Tap to undo">✓ Done</span>';
+  if(c[5]==='skipwait'||c[5]==='skip')return '<span class="chip skip" onclick="unskip('+i+')" title="Tap to undo">⏭ Skipped</span>';
   if(c[5]==='incomplete')return '<span class="chip inc">Missed</span>';
   return '<button class="skip-x" onclick="skip('+i+')">Skip</button><button class="done-btn btn" onclick="complete('+i+')">✓ Done</button>';
 }
 function choreRow(c,i){
   var pay=c[4]?'<span class="pay">'+esc(c[4])+'</span>':'';
   var edit='<button class="editbtn" onclick="editChore('+i+')" aria-label="Edit"><svg viewBox="0 0 24 24"><path d="M5 19h3l9.5-9.5-3-3L5 16zM14.5 6.5l3 3"/></svg></button>';
-  return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+choreControl(c,i)+edit+'</div>';
+  return '<div class="chore" id="chore-'+i+'"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+'<span class="ctl" id="ctl-'+i+'">'+choreControl(c,i)+'</span>'+edit+'</div>';
+}
+/* update ONE row in place — avoids a full re-render swallowing rapid taps */
+function refreshRow(i){
+  var el=document.getElementById('ctl-'+i),c=CH()[i];
+  if(!el||!c)return false;
+  el.innerHTML=choreControl(c,i);
+  var n=BREQ().length+AP().length,b=document.getElementById('navBadge');
+  if(b){if(n){b.textContent=n>9?'9+':n;b.style.display='flex';}else{b.style.display='none';}}
+  var ban=document.getElementById('apBanner');
+  if(ban)ban.style.display=AP().length?'':'none';
+  var cnt=document.getElementById('apCount');if(cnt)cnt.textContent=AP().length;
+  var cnt2=document.getElementById('apCount2');if(cnt2)cnt2.textContent=AP().length+' waiting';
+  return true;
 }
 function previewRow(c){var pay=c[4]?'<span class="pay">'+esc(c[4])+'</span>':'';return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+'</div>';}
 function choresView(){
@@ -459,7 +471,7 @@ function choresView(){
   var out='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:22px;font-weight:800;line-height:1">'+title+'</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+sub+'</div></div><button onclick="addChore()" style="height:44px;padding:0 16px;background:var(--sage);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;flex:none">+ Add</button></div>';
   var dchips=[{v:-1,l:'Today'}];for(var d=0;d<7;d++)dchips.push({v:d,l:DOW3[d]});
   out+='<div class="dayfilter">'+dchips.map(function(c){return '<span class="dchip'+((VIEWDAY===c.v)?' on':'')+'" onclick="setViewDay('+c.v+')">'+c.l+'</span>';}).join('')+'</div>';
-  if(isToday&&ap.length){out+='<div class="banner"><span class="n">'+ap.length+'</span><div><b>'+ap.length+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openBankTab()">Review</span></div>';}
+  if(isToday){out+='<div class="banner" id="apBanner" style="'+(ap.length?'':'display:none')+'"><span class="n" id="apCount">'+ap.length+'</span><div><b id="apCount2">'+ap.length+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openBankTab()">Review</span></div>';}
   var ks=kids();if(!ks.length)ks=['Caden','Gavin'];
   ks.forEach(function(kid){
     var rows=[];

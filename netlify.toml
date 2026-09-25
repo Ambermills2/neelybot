@@ -26,3 +26,14 @@
   for = "/manifest.webmanifest"
   [headers.values]
     Content-Type = "application/manifest+json"
+
+# Grove Chores phone app — never cache; it must always load fresh.
+[[headers]]
+  for = "/chores/*"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"
+
+[[headers]]
+  for = "/chores"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"

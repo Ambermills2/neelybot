@@ -102,12 +102,32 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
 
+<script>
+/* This app must never be served from a stale cache. Evict any service worker
+   (the wall app registers one at "/" whose scope covers /chores) and clear its
+   caches; reload once if a worker was actually controlling this page. */
+(function(){
+  try{
+    if('caches' in window){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});});}
+    if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations){
+      var wasControlled=!!navigator.serviceWorker.controller;
+      navigator.serviceWorker.getRegistrations().then(function(rs){
+        var hit=false;
+        rs.forEach(function(r){var sc=r.scope||'';if(sc.indexOf('/chores')>=0||location.pathname.indexOf('/chores')>=0){r.unregister();hit=true;}});
+        if(hit&&wasControlled&&!sessionStorage.getItem('gc_swbust')){
+          sessionStorage.setItem('gc_swbust','1');location.reload(true);
+        }
+      });
+    }
+  }catch(e){}
+})();
+</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-2a';
+var BUILD='KIDS-2b';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};

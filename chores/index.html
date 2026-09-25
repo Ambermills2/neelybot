@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#26221C">
+<title>Grove Chores</title>
+<style>
+:root{
+  --bg:#EBE6DB;--surface:#FAF7F0;--sunk:#F2ECE0;--ink:#2C2823;--ink2:#575147;--ink3:#8A8478;
+  --line:#E3DCCC;--rail:#26221C;--sage:#7C8666;--saged:#5E7A52;--saget:#E7EADF;
+  --clay:#B07C5E;--clayd:#9A5E3C;--clayt:#F0E4DA;--red:#C0553D;--redt:#F3E1DA;
+  --gold:#B8974E;--goldt:#F0E7D2;--goldd:#8A6E32;--gray:#8A8478;--grayt:#EAE3D4;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;overscroll-behavior-y:none}
+#app{min-height:100%;display:flex;flex-direction:column}
+.hdr{background:var(--rail);color:#EDE6D8;padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.hdr .t{font-size:19px;font-weight:800;letter-spacing:.01em}
+.hdr .sub{font-size:11px;color:#B7AE9C;margin-top:1px}
+.hdr .who{font-size:11px;color:#B7AE9C;background:rgba(255,255,255,.08);padding:5px 10px;border-radius:20px}
+.stage{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(env(safe-area-inset-bottom) + 80px)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 3px rgba(60,50,35,.06);margin-bottom:13px;overflow:hidden}
+.card .in{padding:15px 16px}
+.eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
+.kidhead{display:flex;align-items:center;gap:11px;margin-bottom:2px}
+.av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;flex:none}
+.kidname{font-size:18px;font-weight:800}
+.kidbal{margin-left:auto;font-size:26px;font-weight:800;line-height:1}
+.kidbal .c{font-size:15px;color:var(--ink3)}
+.chore{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+.chore:first-child{border-top:none}
+.chore .body{flex:1;min-width:0}
+.chore .ttl{font-size:15.5px;font-weight:700;line-height:1.2}
+.chore .desc{font-size:11.5px;color:var(--ink3);margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.chore .pay{font-size:12px;font-weight:800;color:var(--saged);background:var(--saget);padding:3px 8px;border-radius:8px;flex:none}
+.btn{border:none;border-radius:12px;font-weight:800;cursor:pointer;font-family:inherit}
+.done-btn{height:44px;min-width:92px;padding:0 16px;background:var(--saged);color:#fff;font-size:15px;flex:none;display:flex;align-items:center;justify-content:center;gap:6px}
+.done-btn:active{transform:scale(.96)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:800;padding:9px 13px;border-radius:11px;flex:none}
+.chip.done{color:var(--saged);border:1.5px solid var(--sage);background:none}
+.chip.wait{color:var(--goldd);background:var(--goldt)}
+.chip.skip{color:var(--gray);background:var(--grayt)}
+.chip.inc{color:var(--red);background:var(--redt)}
+.skip-x{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--line);background:none;color:var(--ink3);font-size:11px;font-weight:800;flex:none}
+.empty{font-size:13px;color:var(--ink3);padding:8px 0}
+.banner{display:flex;align-items:center;gap:12px;background:var(--goldt);border:1px solid #E4D2A6;border-radius:16px;padding:14px 16px;margin-bottom:13px}
+.banner .n{width:34px;height:34px;border-radius:50%;background:var(--goldd);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.banner b{font-size:14.5px}
+.banner .go{margin-left:auto;background:var(--goldd);color:#fff;padding:9px 15px;border-radius:11px;font-size:13px;font-weight:800}
+.txrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.txrow .amt{margin-left:auto;font-weight:800;font-size:15px}
+.moneybtns{display:flex;gap:9px;margin-top:14px}
+.moneybtns button{flex:1;height:46px;border:1.5px solid var(--line);background:none;color:var(--ink2);font-size:14px;border-radius:12px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--rail);display:flex;padding:8px 0 calc(env(safe-area-inset-bottom) + 8px);z-index:20}
+.nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8677;text-decoration:none;font-size:11px;font-weight:700;padding:4px 0}
+.nav a.on{color:#EDE6D8}
+.nav a svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.signin{margin:30px auto;max-width:320px;text-align:center;padding:0 20px}
+.signin h2{font-size:20px;margin:0 0 8px}
+.signin p{color:var(--ink2);font-size:14px;line-height:1.5;margin:0 0 20px}
+.gbtn{width:100%;height:52px;background:var(--sage);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:800}
+.modal{position:fixed;inset:0;background:rgba(30,25,20,.5);display:none;align-items:flex-end;justify-content:center;z-index:40}
+.modal.show{display:flex}
+.sheet{background:var(--surface);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom) + 18px);box-shadow:0 -6px 30px rgba(0,0,0,.2);max-height:88vh;overflow-y:auto}
+.sheet h3{margin:0 0 12px;font-size:17px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:260px;margin:6px auto 0}
+.key{height:56px;border-radius:14px;background:var(--sunk);border:1px solid var(--line);font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.dots{display:flex;gap:12px;justify-content:center;margin:18px 0 4px}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink3)}
+.dot.f{background:var(--ink);border-color:var(--ink)}
+.fld{width:100%;height:50px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font-size:17px;font-family:inherit;background:var(--surface);color:var(--ink);margin-bottom:10px}
+.row2{display:flex;gap:10px;margin-top:6px}
+.row2 button{flex:1;height:50px;border-radius:13px;font-size:16px;font-weight:800;border:none}
+.b-ghost{background:none;border:1.5px solid var(--line)!important;color:var(--ink2)}
+.b-green{background:var(--saged);color:#fff}
+.b-red{background:var(--red);color:#fff}
+.appcard{background:var(--sunk);border-radius:14px;padding:13px;margin-bottom:11px}
+.appcard .amtin{display:flex;align-items:center;gap:8px;margin-top:10px}
+.appcard input{width:90px;height:42px;border:1.5px solid var(--line);border-radius:10px;padding:0 10px;font-size:16px;font-family:inherit;background:var(--surface)}
+.appcard .acts{display:flex;gap:8px;margin-top:11px}
+.appcard .acts button{flex:1;height:44px;border-radius:11px;font-weight:800;font-size:14px;border:none}
+.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 84px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--rail);color:#fff;padding:13px 20px;border-radius:14px;font-size:14px;font-weight:700;opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:90%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.undo-note{font-size:11px;color:var(--ink3);text-align:center;margin-top:2px}
+.build{text-align:center;font-size:9px;color:var(--ink3);letter-spacing:.06em;padding:14px 0 4px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+"use strict";
+var BUILD='KIDS-1a';
+var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
+var HUBCODE='0112';
+var KIDCOL={Caden:'#B8974E',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};
+var TAB='chores';
+var STATE=null, fbAuth=null, fbDoc=null, fbUser=null, _synced=false, _dirty=false, _saveT=null, _ready=false;
+
+/* ---------- helpers ---------- */
+function pad2(n){return (n<10?'0':'')+n;}
+function todayYMD(){var d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+function txDate(){try{return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});}catch(e){return '';}}
+function payAmt(s){var m=/([0-9]+(?:\.[0-9]+)?)/.exec(s||'');return m?parseFloat(m[1]):0;}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function money(n){return '$'+(Number(n)||0).toFixed(2);}
+function CH(){return (STATE&&STATE.CHORES)||[];}
+function AP(){return (STATE&&STATE.APPROVALS)||[];}
+function BAL(){return (STATE&&STATE.KIDBAL)||{};}
+function TX(){return (STATE&&STATE.KIDTX)||{};}
+function kids(){return Object.keys(BAL());}
+
+function choreDaysInfo(c){var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];var days=Array.isArray(c[9])?c[9]:[];var idxs=days.map(function(d){return DOW.indexOf(d);}).filter(function(x){return x>=0;});var win=c[10]||'Today Only';var m=String(win).match(/\d/);var span=m?parseInt(m[0],10):1;if(span<1)span=1;return {idxs:idxs,span:span};}
+function scheduledToday(c){var hasDays=Array.isArray(c[9])&&c[9].length>0;if(c[12]&&!hasDays)return c[12]===todayYMD();var info=choreDaysInfo(c);if(!info.idxs.length)return true;var t=(new Date().getDay()+6)%7;for(var k=0;k<info.idxs.length;k++){if(((t-info.idxs[k])+7)%7<info.span)return true;}return false;}
+function activeToday(c){return c[11]?true:scheduledToday(c);}
+
+/* keep the view correct without depending on the wall tablet's nightly reset (same rules as the main app) */
+function reconcile(){
+  if(!STATE||!STATE.CHORES)return;
+  var t=todayYMD(),list=STATE.CHORES,ap=STATE.APPROVALS||[];
+  for(var i=0;i<list.length;i++){var c=list[i];if(!c)continue;
+    if(c[12]&&Array.isArray(c[9])&&c[9].length){c[12]='';}
+    if(!scheduledToday(c))continue;
+    var s=c[5];
+    if(s==='incomplete'){c[5]='todo';}
+    else if((s==='done'||s==='skip'||s==='wait')&&c[13]!==t){c[5]='todo';c[13]='';}
+    else if(s==='wait'){var ha=false;for(var j=0;j<ap.length;j++){if(ap[j].ci===i&&(!ap[j].date||ap[j].date===t)){ha=true;break;}}if(!ha){c[5]='todo';c[13]='';}}
+  }
+}
+
+/* ---------- firebase sync (shares households/main; writes FULL state so nothing else is wiped) ---------- */
+function fbInit(){
+  try{
+    firebase.initializeApp(FB_CONFIG);
+    fbAuth=firebase.auth();
+    var db=firebase.firestore();
+    try{db.enablePersistence({synchronizeTabs:true}).catch(function(){});}catch(e){}
+    fbDoc=db.collection('households').doc('main');
+    _ready=true;
+    fbAuth.onAuthStateChanged(function(u){fbUser=u;if(u){subscribe();}render();});
+  }catch(e){console.warn('fbInit',e);}
+}
+function subscribe(){
+  _synced=false;_dirty=false;
+  fbDoc.onSnapshot(function(snap){
+    if(!snap.exists){_synced=true;return;}
+    var data=snap.data();_synced=true;
+    if(_dirty)return; // don't clobber an unsaved local edit
+    if(data&&data.stateJson){try{STATE=JSON.parse(data.stateJson);}catch(e){}}
+    reconcile();render();
+  },function(err){console.warn('snapshot',err);});
+}
+function signIn(){if(!_ready){toast('Still loading…');return;}var p=new firebase.auth.GoogleAuthProvider();fbAuth.signInWithPopup(p).catch(function(e){if(e&&e.code!=='auth/popup-closed-by-user')toast('Sign-in did not finish');});}
+function save(){
+  if(!fbUser||!_synced||!STATE)return;
+  _dirty=true;
+  if(_saveT)clearTimeout(_saveT);
+  _saveT=setTimeout(function(){
+    fbDoc.set({stateJson:JSON.stringify(STATE),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:'grove-chores'},{merge:true})
+      .then(function(){_dirty=false;}).catch(function(e){console.warn('save',e);_dirty=false;});
+  },600);
+}
+
+/* ---------- chore actions ---------- */
+function complete(i){var list=CH(),c=list[i];if(!c||c[5]!=='todo')return;var ap=AP(),t=todayYMD();for(var k=ap.length-1;k>=0;k--){if(ap[k].ci===i&&(!ap[k].date||ap[k].date===t))ap.splice(k,1);}c[5]='wait';c[13]=t;ap.push({title:c[3],desc:c[7],who:c[0],color:c[1],amt:payAmt(c[4]),ci:i,date:t});save();render();toast(c[3]+' → waiting for approval ⏳');}
+function undoDone(i){var c=CH()[i];if(!c||c[5]!=='done')return;var kid=c[0],amt=payAmt(c[4]),b=BAL()[kid];confirmSheet('Un-do "'+esc(c[3])+'"?',(amt>0&&b?'It goes back to To-Do and '+money(amt)+' is taken back from '+esc(kid)+'.':'It goes back to To-Do.'),function(){c[5]='todo';c[13]='';if(amt>0&&b){b.bal-=amt;b.wk=Math.max(0,(b.wk||0)-amt);var tx=TX()[kid];if(tx)tx.unshift(['Undo · '+c[3],txDate(),-amt]);}save();render();toast('Undone'+(amt>0&&b?' · −'+money(amt):''));},'Undo','b-red');}
+function skip(i){var c=CH()[i];if(!c)return;gate('Enter the Hub Code to skip',function(){c[5]='skip';c[13]=todayYMD();save();render();toast(c[3]+' skipped for today ⏭');});}
+function unskip(i){var c=CH()[i];if(!c||c[5]!=='skip')return;c[5]='todo';c[13]='';save();render();toast('Un-skipped');}
+
+function openApprovals(){gate('Enter the Hub Code to review',showApprovals);}
+function showApprovals(){
+  var ap=AP();
+  if(!ap.length){sheetHTML('<h3>Approvals</h3><div class="empty">All caught up — nothing to approve. 🎉</div><div class="row2"><button class="b-green" onclick="closeSheet()">Done</button></div>');return;}
+  var body='<h3>Approvals · '+ap.length+' waiting</h3>';
+  ap.forEach(function(a,i){
+    body+='<div class="appcard"><div style="display:flex;align-items:center;gap:9px"><span class="av" style="width:26px;height:26px;font-size:12px;background:'+(a.color||KIDCOL[a.who]||'#999')+'">'+esc((a.who||'?')[0])+'</span><b style="flex:1;font-size:15px">'+a.title+'</b></div>'
+      +'<div style="color:var(--ink3);font-size:12px;margin-top:3px">'+esc(a.who)+(a.desc?' · '+a.desc:'')+'</div>'
+      +'<div class="amtin"><span style="font-weight:800;color:var(--ink3)">$</span><input id="amt'+i+'" type="number" inputmode="decimal" step="0.01" min="0" value="'+(Number(a.amt)||0).toFixed(2)+'"><span style="font-size:12px;color:var(--ink3)">to add / remove</span></div>'
+      +'<div class="acts"><button onclick="removeApproval('+i+')" style="border:1.5px solid var(--line);background:none;color:var(--ink2)">Remove</button><button onclick="reject('+i+')" style="border:1.5px solid var(--red);background:none;color:var(--red)">Reject</button><button onclick="approve('+i+')" class="b-green">Approve</button></div></div>';
+  });
+  body+='<div class="row2"><button class="b-ghost" onclick="closeSheet()">Done</button></div>';
+  sheetHTML(body);
+}
+function _amt(i,a){var el=document.getElementById('amt'+i);return parseFloat(el?el.value:a.amt)||0;}
+function approve(i){var ap=AP(),a=ap[i];if(!a)return;var amt=_amt(i,a),b=BAL()[a.who];if(a.ci!=null&&CH()[a.ci]&&(!a.date||a.date===todayYMD())){CH()[a.ci][5]='done';CH()[a.ci][13]=a.date||todayYMD();}if(b){b.bal+=amt;b.wk=(b.wk||0)+amt;var tx=TX()[a.who];if(tx)tx.unshift([a.title,txDate(),amt]);}ap.splice(i,1);save();toast('Approved · +'+money(amt)+' to '+a.who+' 💰');showApprovals();render();}
+function reject(i){var ap=AP(),a=ap[i];if(!a)return;var amt=_amt(i,a),b=BAL()[a.who];if(b){b.bal-=amt;var tx=TX()[a.who];if(tx)tx.unshift(['Rejected · '+a.title,txDate(),-amt]);}if(a.ci!=null&&CH()[a.ci]){CH()[a.ci][5]='incomplete';CH()[a.ci][11]=0;}ap.splice(i,1);save();toast('Rejected · −'+money(amt));showApprovals();render();}
+function removeApproval(i){var ap=AP(),a=ap[i];if(!a)return;if(a.ci!=null&&CH()[a.ci]&&CH()[a.ci][5]==='wait')CH()[a.ci][5]='todo';ap.splice(i,1);save();toast('Removed');showApprovals();render();}
+
+/* ---------- banking ---------- */
+function bankMove(kid,dir){
+  gate('Enter the Hub Code',function(){
+    sheetHTML('<h3>'+(dir==='in'?'Deposit to ':'Withdraw from ')+esc(kid)+'</h3>'
+      +'<input id="bmAmt" class="fld" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" autofocus>'
+      +'<input id="bmFor" class="fld" placeholder="'+(dir==='in'?'e.g. Allowance':'e.g. Bought a toy')+'">'
+      +'<div class="row2"><button class="b-ghost" onclick="closeSheet()">Cancel</button><button class="'+(dir==='in'?'b-green':'b-red')+'" onclick="doBankMove(\''+kid+'\',\''+dir+'\')">'+(dir==='in'?'Deposit':'Withdraw')+'</button></div>');
+    setTimeout(function(){var e=document.getElementById('bmAmt');if(e)e.focus();},60);
+  });
+}
+function doBankMove(kid,dir){
+  var amt=parseFloat((document.getElementById('bmAmt')||{}).value)||0;if(amt<=0){toast('Enter an amount');return;}
+  var reason=((document.getElementById('bmFor')||{}).value||'').trim()||(dir==='in'?'Deposit':'Withdrawal');
+  var b=BAL()[kid],tx=TX()[kid];if(!b){closeSheet();return;}
+  if(dir==='in'){b.bal+=amt;b.wk=(b.wk||0)+amt;if(tx)tx.unshift([reason,txDate(),amt]);}
+  else{b.bal-=amt;if(tx)tx.unshift([reason,txDate(),-amt]);}
+  save();closeSheet();render();toast((dir==='in'?'Deposited ':'Withdrew ')+money(amt));
+}
+
+/* ---------- hub code gate ---------- */
+var _pin='',_pinCB=null;
+function gate(msg,cb){_pin='';_pinCB=cb;
+  sheetHTML('<h3 style="text-align:center">Hub Code</h3><div style="text-align:center;color:var(--ink3);font-size:12.5px;margin-bottom:6px">'+esc(msg)+'</div>'
+    +'<div class="dots" id="dots">'+[0,0,0,0].map(function(){return '<span class="dot"></span>';}).join('')+'</div>'
+    +'<div class="pad">'+[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(function(k){return k===''?'<span></span>':'<div class="key" onclick="pin(\''+(k==='⌫'?'del':k)+'\')">'+k+'</div>';}).join('')+'</div>'
+    +'<div class="row2" style="margin-top:16px"><button class="b-ghost" onclick="closeSheet()">Cancel</button></div>');
+}
+function pin(k){
+  if(k==='del')_pin=_pin.slice(0,-1);else if(_pin.length<4)_pin+=k;
+  var dots=document.querySelectorAll('#dots .dot');dots.forEach(function(d,i){d.classList.toggle('f',i<_pin.length);});
+  if(_pin.length===4){
+    if(_pin===HUBCODE){var cb=_pinCB;_pinCB=null;setTimeout(function(){closeSheet();if(cb)cb();},180);}
+    else{setTimeout(function(){_pin='';document.querySelectorAll('#dots .dot').forEach(function(d){d.classList.remove('f');});toast('Wrong Hub Code');},220);}
+  }
+}
+
+/* ---------- generic sheet / confirm / toast ---------- */
+function sheetHTML(h){document.getElementById('sheet').innerHTML=h;document.getElementById('modal').classList.add('show');}
+function closeSheet(){document.getElementById('modal').classList.remove('show');}
+var _confCB=null;
+function confirmSheet(title,msg,cb,label,cls){_confCB=cb;sheetHTML('<h3>'+title+'</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">'+msg+'</div><div class="row2"><button class="b-ghost" onclick="closeSheet()">Cancel</button><button class="'+(cls||'b-red')+'" onclick="runConfirm()">'+(label||'Yes')+'</button></div>');}
+function runConfirm(){var cb=_confCB;_confCB=null;closeSheet();if(cb)cb();}
+var _toastT=null;
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');if(_toastT)clearTimeout(_toastT);_toastT=setTimeout(function(){t.classList.remove('show');},2400);}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target.id==='modal')closeSheet();});
+
+/* ---------- render ---------- */
+function ic(name){var p={home:'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10',check:'M5 4.5h14v16H5zM9 4.5a3 3 0 0 1 6 0M8.5 12.5l2 2 4-4.5',bank:'M4 9 12 4l8 5M5 9v9h14V9M9 18v-5h6v5'}[name]||'';return '<svg viewBox="0 0 24 24"><path d="'+p+'"/></svg>';}
+function go(t){TAB=t;render();document.querySelector('.stage').scrollTop=0;}
+
+function render(){
+  var app=document.getElementById('app');
+  var head='<div class="hdr"><div><div class="t">Gracie’s Grove</div><div class="sub">'+(fbUser?'Chores &amp; Banking':'Sign in to sync')+'</div></div>'+(fbUser?'<span class="who">'+esc((fbUser.displayName||fbUser.email||'').split(' ')[0]||'Synced')+'</span>':'')+'</div>';
+  var body;
+  if(!fbUser){
+    body='<div class="stage"><div class="signin"><h2>Grove Chores</h2><p>Sign in with the family Google account to load Caden &amp; Gavin’s chores and banks. Everything stays in sync with the wall tablet.</p><button class="gbtn" onclick="signIn()">Sign in with Google</button></div><div class="build">Build '+BUILD+'</div></div>';
+    app.innerHTML=head+body;return;
+  }
+  if(!STATE){body='<div class="stage"><div class="card"><div class="in"><div class="empty">Loading your chores…</div></div></div></div>';app.innerHTML=head+body;return;}
+  body='<div class="stage">'+(TAB==='chores'?choresView():bankView())+'<div class="build">Build '+BUILD+'</div></div>';
+  var nav='<div class="nav"><a href="javascript:void(0)" onclick="go(\'chores\')" class="'+(TAB==='chores'?'on':'')+'">'+ic('check')+'Chores</a><a href="javascript:void(0)" onclick="go(\'bank\')" class="'+(TAB==='bank'?'on':'')+'">'+ic('bank')+'Bank</a></div>';
+  app.innerHTML=head+body+nav;
+}
+
+function choreControl(c,i){
+  if(c[5]==='wait')return '<span class="chip wait">↩ Waiting</span>';
+  if(c[5]==='done')return '<span class="chip done" onclick="undoDone('+i+')">✓ Done</span>';
+  if(c[5]==='skip')return '<span class="chip skip" onclick="unskip('+i+')">⏭ Skipped</span>';
+  if(c[5]==='incomplete')return '<span class="chip inc">Missed</span>';
+  return '<button class="skip-x" onclick="skip('+i+')">Skip</button><button class="done-btn btn" onclick="complete('+i+')">✓ Done</button>';
+}
+function choreRow(c,i){
+  var pay=c[4]?'<span class="pay">'+esc(c[4])+'</span>':'';
+  return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+choreControl(c,i)+'</div>';
+}
+function choresView(){
+  var list=CH(),ap=AP(),out='';
+  if(ap.length){out+='<div class="banner"><span class="n">'+ap.length+'</span><div><b>'+ap.length+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openApprovals()">Review</span></div>';}
+  var ks=kids();if(!ks.length)ks=['Caden','Gavin'];
+  ks.forEach(function(kid){
+    var rows=[];
+    for(var i=0;i<list.length;i++){if(list[i]&&list[i][0]===kid&&activeToday(list[i]))rows.push(i);}
+    rows.sort(function(a,b){var pa=(list[a][5]==='done'||list[a][5]==='skip')?1:0,pb=(list[b][5]==='done'||list[b][5]==='skip')?1:0;return pa-pb;});
+    var b=BAL()[kid]||{bal:0};
+    var col=KIDCOL[kid]||'#999';
+    var dollars=Math.floor(b.bal||0),cents=('0'+Math.round(((b.bal||0)-dollars)*100)).slice(-2);
+    var inner=rows.length?rows.map(function(i){return choreRow(list[i],i);}).join(''):'<div class="empty">Nothing left today — nice work! 🎉</div>';
+    out+='<div class="card"><div class="in"><div class="kidhead"><span class="av" style="background:'+col+'">'+esc(kid[0])+'</span><div class="kidname">'+esc(kid)+'</div><div class="kidbal">$'+dollars+'<span class="c">.'+cents+'</span></div></div></div><div class="in" style="padding-top:2px">'+inner+'</div></div>';
+  });
+  return out;
+}
+
+function bankView(){
+  var out='',ks=kids();if(!ks.length)ks=['Caden','Gavin'];
+  ks.forEach(function(kid){
+    var b=BAL()[kid]||{bal:0,wk:0},col=KIDCOL[kid]||'#999';
+    var tx=(TX()[kid]||[]).slice(0,8);
+    var dollars=Math.floor(b.bal||0),cents=('0'+Math.round(((b.bal||0)-dollars)*100)).slice(-2);
+    var txhtml=tx.length?tx.map(function(t){var amt=Number(t[2])||0;return '<div class="txrow"><div><div style="font-size:13.5px;font-weight:700">'+esc(t[0])+'</div><div style="font-size:11px;color:var(--ink3)">'+esc(t[1])+'</div></div><div class="amt" style="color:'+(amt>0?'var(--saged)':'var(--clayd)')+'">'+(amt>0?'+':'−')+'$'+Math.abs(amt).toFixed(2)+'</div></div>';}).join(''):'<div class="empty">No transactions yet.</div>';
+    out+='<div class="card"><div class="in"><div class="kidhead"><span class="av" style="background:'+col+'">'+esc(kid[0])+'</span><div class="kidname">'+esc(kid)+'</div><div class="kidbal">$'+dollars+'<span class="c">.'+cents+'</span></div></div>'
+      +'<div style="font-size:12px;color:var(--saged);font-weight:800;margin-top:2px">+'+money(b.wk||0)+' this week</div>'
+      +'<div class="moneybtns"><button onclick="bankMove(\''+kid+'\',\'in\')">▲ Deposit</button><button onclick="bankMove(\''+kid+'\',\'out\')">▼ Withdraw</button></div>'
+      +'<div class="eyebrow" style="margin:16px 0 2px">Recent</div>'+txhtml
+      +'</div></div>';
+  });
+  return out;
+}
+
+/* ---------- boot ---------- */
+render();
+fbInit();
+</script>
+</body>
+</html>

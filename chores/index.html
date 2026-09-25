@@ -261,9 +261,9 @@ function showApprovals(){
       +'<div style="color:var(--ink3);font-size:12px;margin-top:3px">'+esc(a.who)+(a.desc?' · '+a.desc:'')+'</div>'
       +(a.skip
         ?'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">Asking to skip today — no money either way.</div>'
-         +'<div class="acts"><button onclick="removeApproval('+i+')" style="border:1.5px solid var(--line);background:none;color:var(--ink2)">Remove</button><button onclick="reject('+i+')" style="border:1.5px solid var(--red);background:none;color:var(--red)">Deny</button><button onclick="approve('+i+')" class="b-green">Allow Skip</button></div>'
+         +'<div class="acts"><button onclick="reject('+i+')" style="border:1.5px solid var(--red);background:none;color:var(--red)">Deny</button><button onclick="approve('+i+')" class="b-green">Allow Skip</button></div>'
         :'<div class="amtin"><span style="font-weight:800;color:var(--ink3)">$</span><input id="amt'+i+'" type="number" inputmode="decimal" step="0.01" min="0" value="'+(Number(a.amt)||0).toFixed(2)+'"><span style="font-size:12px;color:var(--ink3)">to add / remove</span></div>'
-         +'<div class="acts"><button onclick="removeApproval('+i+')" style="border:1.5px solid var(--line);background:none;color:var(--ink2)">Remove</button><button onclick="reject('+i+')" style="border:1.5px solid var(--red);background:none;color:var(--red)">Reject</button><button onclick="approve('+i+')" class="b-green">Approve</button></div>')
+         +'<div class="acts"><button onclick="reject('+i+')" style="border:1.5px solid var(--red);background:none;color:var(--red)">Reject</button><button onclick="approve('+i+')" class="b-green">Approve</button></div>')
       +'</div>';
   });
   body+='<div class="row2"><button class="b-ghost" onclick="closeSheet()">Done</button></div>';

@@ -107,7 +107,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-1a';
+var BUILD='KIDS-2a';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};
@@ -373,6 +373,11 @@ function rejectChoreAt(i){var c=CH()[i];if(!c)return;
   var ttl=c[3];
   sheetHTML('<h3>Add chore back in?</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">'+(isSkip?'Skip denied.':'Rejected \u2014 no money moved.')+' Put "'+ttl+'" back on the list so they still do it?</div>'
     +'<div class="row2"><button class="b-ghost" onclick="skipDenyBack('+i+',false)">No</button><button class="b-green" onclick="skipDenyBack('+i+',true)">Yes, add it back</button></div>');}
+function choreDiag(){var t=todayYMD(),list=CH(),rows=[];
+  for(var i=0;i<list.length;i++){var c=list[i];if(!c)continue;
+    if(c[5]==='todo'&&!(c[13]===t))continue;
+    rows.push(i+' '+String(c[3]).slice(0,16)+' ['+c[5]+'] c13='+(c[13]||'-'));}
+  return '<div style="font-size:9.5px;color:#b00;padding:6px 14px 20px;line-height:1.6;word-break:break-word">DIAG pend='+pendingChores().length+' ap='+AP().length+' | '+(rows.join(' \u00b7 ')||'none')+'</div>';}
 function bankAppView(){
   var reqs=BREQ();
   var tot=reqs.length+pendingChores().length;
@@ -458,7 +463,7 @@ function render(){
     app.innerHTML=head+body;return;
   }
   if(!STATE){body='<div class="stage"><div class="card"><div class="in"><div class="empty">Loading your chores…</div></div></div></div>';app.innerHTML=head+body;return;}
-  body='<div class="stage">'+(TAB==='chores'?choresView():TAB==='bankapp'?bankAppView():bankView())+'<div class="build">Build '+BUILD+'</div></div>';
+  body='<div class="stage">'+(TAB==='chores'?choresView():TAB==='bankapp'?bankAppView():bankView())+'<div class="build">Build '+BUILD+'</div>'+choreDiag()+'</div>';
   var nreq=BREQ().length+pendingChores().length;
   var nav='<div class="nav"><a href="javascript:void(0)" onclick="go(\'chores\')" class="'+(TAB==='chores'?'on':'')+'">'+ic('check')+'Chores</a>'
     +'<a href="javascript:void(0)" onclick="go(\'bank\')" class="'+(TAB==='bank'?'on':'')+'">'+ic('bank')+'Bank</a>'

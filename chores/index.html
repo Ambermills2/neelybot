@@ -133,7 +133,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-5b';
+var BUILD='KIDS-5c';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#7E5A9B',Ryan:'#B8453C'};
@@ -261,6 +261,31 @@ function importFromMain(){
     }
     rollWeek();reconcile();save();render();toast('Chores & banking loaded');
   }).catch(function(){STATE=blankState();save();render();});
+}
+function needsImport(){if(!STATE)return false;
+  var noCh=!Array.isArray(STATE.CHORES)||!STATE.CHORES.length;
+  var bal=STATE.KIDBAL||{},noMoney=Object.keys(bal).every(function(k){return !(Number(bal[k]&&bal[k].bal)||0);});
+  return noCh&&noMoney;}
+function forceImport(){
+  if(!fbAuth){toast('Still loading');return;}
+  var go=function(){
+    fbMain.get().then(function(sn){
+      if(!sn.exists){toast('Nothing found to import');return;}
+      var d=sn.data(),old=null;try{old=d&&d.stateJson?JSON.parse(d.stateJson):null;}catch(e){}
+      if(!old){toast('Nothing found to import');return;}
+      if(!STATE)STATE=blankState();
+      if(Array.isArray(old.CHORES))STATE.CHORES=old.CHORES;
+      if(Array.isArray(old.APPROVALS))STATE.APPROVALS=old.APPROVALS;
+      if(old.KIDBAL&&typeof old.KIDBAL==='object')STATE.KIDBAL=old.KIDBAL;
+      if(old.KIDTX&&typeof old.KIDTX==='object')STATE.KIDTX=old.KIDTX;
+      rollWeek();reconcile();save();render();
+      toast('Imported '+(STATE.CHORES?STATE.CHORES.length:0)+' chores + balances \u2705');
+    }).catch(function(e){console.warn(e);toast('Could not read the old data');});
+  };
+  if(fbUser&&!fbUser.isAnonymous){go();return;}
+  var p=new firebase.auth.GoogleAuthProvider();
+  fbAuth.signInWithPopup(p).then(function(){setTimeout(go,400);})
+    .catch(function(e){if(e&&e.code!=='auth/popup-closed-by-user')toast('Sign-in did not finish');});
 }
 function blankState(){return {CHORES:[],APPROVALS:[],KIDBAL:{Caden:{bal:0,wk:0},Gavin:{bal:0,wk:0}},KIDTX:{Caden:[],Gavin:[]},BANKREQ:[],APPLOG:[],WEEKSTART:''};}
 function signIn(){if(!_ready){toast('Still loading…');return;}var p=new firebase.auth.GoogleAuthProvider();fbAuth.signInWithPopup(p).catch(function(e){if(e&&e.code!=='auth/popup-closed-by-user')toast('Sign-in did not finish');});}
@@ -693,7 +718,9 @@ function choresView(){
   var wd=isToday?todWd:VIEWDAY;
   var title=isToday?'Today’s Chores':DOWfull[wd]+'’s Chores';
   var sub=isToday?new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}):'What’s scheduled';
-  var out='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:22px;font-weight:800;line-height:1">'+title+'</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+sub+'</div></div><button onclick="addChore()" style="height:44px;padding:0 16px;background:var(--sage);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;flex:none">+ Add</button></div>';
+  var out='';
+  if(needsImport())out+='<div class="banner" style="background:var(--saget);border-color:#C9D2BB"><span class="n" style="background:var(--saged)">\u2193</span><div><b>Bring over your chores</b><div style="font-size:11.5px;color:var(--saged)">One-time copy from the wall app</div></div><span class="go" style="background:var(--saged)" onclick="forceImport()">Import</span></div>';
+  out+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:22px;font-weight:800;line-height:1">'+title+'</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+sub+'</div></div><button onclick="addChore()" style="height:44px;padding:0 16px;background:var(--sage);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;flex:none">+ Add</button></div>';
   var dchips=[{v:-1,l:'Today'}];for(var d=0;d<7;d++)dchips.push({v:d,l:DOW3[d]});
   out+='<div class="dayfilter">'+dchips.map(function(c){return '<span class="dchip'+((VIEWDAY===c.v)?' on':'')+'" onclick="setViewDay('+c.v+')">'+c.l+'</span>';}).join('')+'</div>';
   var np=pendingChores().length;if(isToday){out+='<div class="banner" id="apBanner" style="'+(np?'':'display:none')+'"><span class="n" id="apCount">'+np+'</span><div><b id="apCount2">'+np+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openBankTab()">Review</span></div>';}

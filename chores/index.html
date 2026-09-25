@@ -110,7 +110,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 var BUILD='KIDS-1a';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
-var KIDCOL={Caden:'#B8974E',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};
+var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};
 var TAB='chores';
 var VIEWDAY=-1; // -1 = today; 0..6 = Mon..Sun
 var TXSHOW={}; // per-kid transaction count shown
@@ -127,6 +127,7 @@ function CH(){return (STATE&&STATE.CHORES)||[];}
 function AP(){return (STATE&&STATE.APPROVALS)||[];}
 function BAL(){return (STATE&&STATE.KIDBAL)||{};}
 function TX(){return (STATE&&STATE.KIDTX)||{};}
+function BREQ(){if(STATE&&!Array.isArray(STATE.BANKREQ))STATE.BANKREQ=[];return (STATE&&STATE.BANKREQ)||[];}
 function kids(){return Object.keys(BAL());}
 
 function choreDaysInfo(c){var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];var days=Array.isArray(c[9])?c[9]:[];var idxs=days.map(function(d){return DOW.indexOf(d);}).filter(function(x){return x>=0;});var win=c[10]||'Today Only';var m=String(win).match(/\d/);var span=m?parseInt(m[0],10):1;if(span<1)span=1;return {idxs:idxs,span:span};}
@@ -274,7 +275,10 @@ function approve(i){var ap=AP(),a=ap[i];if(!a)return;
   if(a.skip){if(a.ci!=null&&CH()[a.ci]&&(!a.date||a.date===todayYMD())){CH()[a.ci][5]='skip';CH()[a.ci][13]=a.date||todayYMD();}ap.splice(i,1);save();toast('Skip approved · no money change ⏭');showApprovals();render();return;}
   var amt=_amt(i,a),b=BAL()[a.who];if(a.ci!=null&&CH()[a.ci]&&(!a.date||a.date===todayYMD())){CH()[a.ci][5]='done';CH()[a.ci][13]=a.date||todayYMD();}if(b){b.bal+=amt;b.wk=(b.wk||0)+amt;var tx=TX()[a.who];if(tx)tx.unshift([a.title,txDate(),amt]);}ap.splice(i,1);save();toast('Approved · +'+money(amt)+' to '+a.who+' 💰');showApprovals();render();}
 function reject(i){var ap=AP(),a=ap[i];if(!a)return;
-  if(a.skip){if(a.ci!=null&&CH()[a.ci])CH()[a.ci][5]='todo';ap.splice(i,1);save();toast('Skip denied · back to To-Do');showApprovals();render();return;}
+  if(a.skip){var sci=a.ci,st=a.title;ap.splice(i,1);save();render();
+    sheetHTML('<h3>Add chore back in?</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">Skip denied. Put "'+st+'" back on the list so they still do it?</div>'
+      +'<div class="row2"><button class="b-ghost" onclick="skipDenyBack('+(sci==null?-1:sci)+',false)">No</button><button class="b-green" onclick="skipDenyBack('+(sci==null?-1:sci)+',true)">Yes, add it back</button></div>');
+    return;}
   var amt=_amt(i,a),b=BAL()[a.who];
   // Step 1: remove money?
   var q1='<h3>Remove money from bank?</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">Take '+money(amt)+' out of '+esc(a.who)+'’s account for "'+a.title+'"?</div>'
@@ -290,6 +294,9 @@ function rejStep1(i,takeMoney){
   var t=a.title;
   sheetHTML('<h3>Add chore back for next day?</h3><div style="font-size:14px;color:var(--ink2);line-height:1.5;margin-bottom:16px">Put "'+t+'" back on the list so they do it again?'+(takeMoney?'<br><span style="color:var(--red);font-weight:700">'+money(amt)+' was taken back.</span>':'')+'</div>'
     +'<div class="row2"><button class="b-ghost" onclick="rejStep2('+(ci==null?-1:ci)+',false)">No</button><button class="b-green" onclick="rejStep2('+(ci==null?-1:ci)+',true)">Yes, add it back</button></div>');}
+function skipDenyBack(ci,addBack){
+  if(ci>=0&&CH()[ci]){if(addBack){CH()[ci][5]='todo';CH()[ci][11]=1;CH()[ci][13]='';}else{CH()[ci][5]='incomplete';CH()[ci][11]=0;}}
+  save();render();toast(addBack?'Added back to the list':'Left in Incomplete');showApprovals();}
 function rejStep2(ci,addBack){
   if(addBack&&ci>=0&&CH()[ci]){CH()[ci][5]='todo';CH()[ci][11]=1;CH()[ci][13]='';}
   save();render();toast(addBack?'Added back for next day':'Left in Incomplete');showApprovals();}
@@ -297,13 +304,12 @@ function removeApproval(i){var ap=AP(),a=ap[i];if(!a)return;if(a.ci!=null&&CH()[
 
 /* ---------- banking ---------- */
 function bankMove(kid,dir){
-  gate('Enter the Hub Code',function(){
-    sheetHTML('<h3>'+(dir==='in'?'Deposit to ':'Withdraw from ')+esc(kid)+'</h3>'
-      +'<input id="bmAmt" class="fld" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" autofocus>'
-      +'<input id="bmFor" class="fld" placeholder="'+(dir==='in'?'e.g. Allowance':'e.g. Bought a toy')+'">'
-      +'<div class="row2"><button class="b-ghost" onclick="closeSheet()">Cancel</button><button class="'+(dir==='in'?'b-green':'b-red')+'" onclick="doBankMove(\''+kid+'\',\''+dir+'\')">'+(dir==='in'?'Deposit':'Withdraw')+'</button></div>');
-    setTimeout(function(){var e=document.getElementById('bmAmt');if(e)e.focus();},60);
-  });
+  sheetHTML('<h3>'+(dir==='in'?'Request deposit to ':'Request withdrawal from ')+esc(kid)+'</h3>'
+    +'<input id="bmAmt" class="fld" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" autofocus>'
+    +'<input id="bmFor" class="fld" placeholder="'+(dir==='in'?'e.g. Allowance':'e.g. Bought a toy')+'">'
+    +'<div style="font-size:12.5px;color:var(--ink3);line-height:1.5;margin:2px 0 4px">This goes to Bank Approvals — the money moves once it’s approved.</div>'
+    +'<div class="row2"><button class="b-ghost" onclick="closeSheet()">Cancel</button><button class="'+(dir==='in'?'b-green':'b-red')+'" onclick="doBankMove(\''+kid+'\',\''+dir+'\')">Send Request</button></div>');
+  setTimeout(function(){var e=document.getElementById('bmAmt');if(e)e.focus();},60);
 }
 function moreTx(kid){TXSHOW[kid]=(TXSHOW[kid]||8)+20;render();}
 function lessTx(kid){TXSHOW[kid]=8;render();}
@@ -321,10 +327,35 @@ function removeTx(kid,ti){
 function doBankMove(kid,dir){
   var amt=parseFloat((document.getElementById('bmAmt')||{}).value)||0;if(amt<=0){toast('Enter an amount');return;}
   var reason=((document.getElementById('bmFor')||{}).value||'').trim()||(dir==='in'?'Deposit':'Withdrawal');
-  var b=BAL()[kid],tx=TX()[kid];if(!b){closeSheet();return;}
-  if(dir==='in'){b.bal+=amt;b.wk=(b.wk||0)+amt;if(tx)tx.unshift([reason,txDate(),amt]);}
-  else{b.bal-=amt;if(tx)tx.unshift([reason,txDate(),-amt]);}
-  save();closeSheet();render();toast((dir==='in'?'Deposited ':'Withdrew ')+money(amt));
+  BREQ().push({kid:kid,dir:dir,amt:amt,reason:reason,date:todayYMD(),when:txDate()});
+  save();closeSheet();render();toast('Request sent for approval 🕓');
+}
+/* ---------- bank approvals ---------- */
+var _bankUnlocked=false;
+function openBankTab(){if(_bankUnlocked){TAB='bankapp';render();return;}gate('Enter the Hub Code for Bank Approvals',function(){_bankUnlocked=true;TAB='bankapp';render();});}
+function approveBank(i){
+  var r=BREQ()[i];if(!r)return;
+  var b=BAL()[r.kid],tx=TX()[r.kid];
+  if(b){if(r.dir==='in'){b.bal+=r.amt;b.wk=(b.wk||0)+r.amt;if(tx)tx.unshift([r.reason,txDate(),r.amt]);}
+        else{b.bal-=r.amt;if(tx)tx.unshift([r.reason,txDate(),-r.amt]);}}
+  BREQ().splice(i,1);save();render();toast((r.dir==='in'?'Deposited ':'Withdrew ')+money(r.amt)+' · '+esc(r.kid));
+}
+function declineBank(i){var r=BREQ()[i];if(!r)return;BREQ().splice(i,1);save();render();toast('Request declined · no money moved');}
+function bankAppView(){
+  var reqs=BREQ();
+  var out='<div style="margin-bottom:14px"><div style="font-size:22px;font-weight:800;line-height:1">Bank Approvals</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+(reqs.length?reqs.length+' request'+(reqs.length===1?'':'s')+' waiting':'Nothing waiting')+'</div></div>';
+  if(!reqs.length){out+='<div class="card"><div class="in"><div class="empty">No pending requests. 🎉</div></div></div>';return out;}
+  reqs.forEach(function(r,i){
+    var inn=r.dir==='in';
+    out+='<div class="card"><div class="in">'
+      +'<div style="display:flex;align-items:center;gap:10px"><span class="av" style="width:32px;height:32px;font-size:14px;background:'+(KIDCOL[r.kid]||'#999')+'">'+esc(r.kid[0])+'</span>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800">'+esc(r.reason)+'</div><div style="font-size:11.5px;color:var(--ink3)">'+esc(r.kid)+' · '+esc(r.when||r.date)+'</div></div>'
+      +'<div style="font-size:20px;font-weight:800;color:'+(inn?'var(--saged)':'var(--clayd)')+'">'+(inn?'+':'−')+'$'+r.amt.toFixed(2)+'</div></div>'
+      +'<div style="font-size:12.5px;color:var(--ink2);margin-top:9px">'+(inn?'Deposit into':'Withdraw from')+' '+esc(r.kid)+'’s account.</div>'
+      +'<div class="acts" style="display:flex;gap:9px;margin-top:12px"><button onclick="declineBank('+i+')" style="flex:1;height:46px;border-radius:12px;border:1.5px solid var(--red);background:none;color:var(--red);font-weight:800;font-size:15px">Decline</button><button onclick="approveBank('+i+')" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--saged);color:#fff;font-weight:800;font-size:15px">Approve</button></div>'
+      +'</div></div>';
+  });
+  return out;
 }
 
 /* ---------- hub code gate ---------- */
@@ -355,7 +386,7 @@ function toast(m){var t=document.getElementById('toast');t.textContent=m;t.class
 document.getElementById('modal').addEventListener('click',function(e){if(e.target.id==='modal')closeSheet();});
 
 /* ---------- render ---------- */
-function ic(name){var p={home:'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10',check:'M5 4.5h14v16H5zM9 4.5a3 3 0 0 1 6 0M8.5 12.5l2 2 4-4.5',bank:'M4 9 12 4l8 5M5 9v9h14V9M9 18v-5h6v5'}[name]||'';return '<svg viewBox="0 0 24 24"><path d="'+p+'"/></svg>';}
+function ic(name){var p={home:'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10',check:'M5 4.5h14v16H5zM9 4.5a3 3 0 0 1 6 0M8.5 12.5l2 2 4-4.5',bank:'M4 9 12 4l8 5M5 9v9h14V9M9 18v-5h6v5',lock:'M5 10.5h14v9H5zM8 10.5V8a4 4 0 0 1 8 0v2.5'}[name]||'';return '<svg viewBox="0 0 24 24"><path d="'+p+'"/></svg>';}
 function go(t){TAB=t;render();document.querySelector('.stage').scrollTop=0;}
 function setViewDay(d){VIEWDAY=d;render();var st=document.querySelector('.stage');if(st)st.scrollTop=0;}
 
@@ -368,8 +399,11 @@ function render(){
     app.innerHTML=head+body;return;
   }
   if(!STATE){body='<div class="stage"><div class="card"><div class="in"><div class="empty">Loading your chores…</div></div></div></div>';app.innerHTML=head+body;return;}
-  body='<div class="stage">'+(TAB==='chores'?choresView():bankView())+'<div class="build">Build '+BUILD+'</div></div>';
-  var nav='<div class="nav"><a href="javascript:void(0)" onclick="go(\'chores\')" class="'+(TAB==='chores'?'on':'')+'">'+ic('check')+'Chores</a><a href="javascript:void(0)" onclick="go(\'bank\')" class="'+(TAB==='bank'?'on':'')+'">'+ic('bank')+'Bank</a></div>';
+  body='<div class="stage">'+(TAB==='chores'?choresView():TAB==='bankapp'?bankAppView():bankView())+'<div class="build">Build '+BUILD+'</div></div>';
+  var nreq=BREQ().length;
+  var nav='<div class="nav"><a href="javascript:void(0)" onclick="go(\'chores\')" class="'+(TAB==='chores'?'on':'')+'">'+ic('check')+'Chores</a>'
+    +'<a href="javascript:void(0)" onclick="go(\'bank\')" class="'+(TAB==='bank'?'on':'')+'">'+ic('bank')+'Bank</a>'
+    +'<a href="javascript:void(0)" onclick="openBankTab()" class="'+(TAB==='bankapp'?'on':'')+'" style="position:relative">'+ic('lock')+'Approvals'+(nreq?'<span style="position:absolute;top:0;right:22%;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#C0553D;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">'+(nreq>9?'9+':nreq)+'</span>':'')+'</a></div>';
   app.innerHTML=head+body+nav;
 }
 

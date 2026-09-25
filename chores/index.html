@@ -131,7 +131,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-3a';
+var BUILD='KIDS-3b';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};
@@ -563,7 +563,7 @@ function refreshRow(i){
   var cnt2=document.getElementById('apCount2');if(cnt2)cnt2.textContent=npc+' waiting';
   return true;
 }
-function previewRow(c){var pay=c[4]?'<span class="pay">'+esc(c[4])+'</span>':'';return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+'</div>';}
+function previewRow(c,i){return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+(c[4]?'<div class="paylin">'+esc(c[4])+'</div>':'')+'</div><button class="editbtn" onclick="editChore('+i+')" aria-label="Edit"><svg viewBox="0 0 24 24"><path d="M5 19h3l9.5-9.5-3-3L5 16zM14.5 6.5l3 3"/></svg></button></div>';}
 function clearAllChores(){gate('Enter the Hub Code to clear all chores',function(){
   var n=CH().length;
   confirmSheet('Remove all chores?','Delete all '+n+' chore'+(n===1?'':'s')+' and clear pending approvals. The boys\u2019 bank balances are NOT touched.',function(){
@@ -590,7 +590,7 @@ function choresView(){
     var col=KIDCOL[kid]||'#999';
     var dollars=Math.floor(b.bal||0),cents=('0'+Math.round(((b.bal||0)-dollars)*100)).slice(-2);
     var inner=rows.length
-      ? rows.map(function(i){return isToday?choreRow(list[i],i):previewRow(list[i]);}).join('')
+      ? rows.map(function(i){return isToday?choreRow(list[i],i):previewRow(list[i],i);}).join('')
       : '<div class="empty">'+(isToday?'No chores today. 🎉':'No chores on '+DOWfull[wd]+'.')+'</div>';
     out+='<div class="card"><div class="in"><div class="kidhead"><span class="av" style="background:'+col+'">'+esc(kid[0])+'</span><div class="kidname">'+esc(kid)+'</div><div class="kidbal">$'+dollars+'<span class="c">.'+cents+'</span></div></div></div><div class="in" style="padding-top:2px">'+inner+'</div></div>';
   });

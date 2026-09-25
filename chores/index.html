@@ -87,6 +87,10 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .undo-note{font-size:11px;color:var(--ink3);text-align:center;margin-top:2px}
 .build{text-align:center;font-size:9px;color:var(--ink3);letter-spacing:.06em;padding:14px 0 4px}
+.dayfilter{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px;padding-bottom:3px}
+.dayfilter::-webkit-scrollbar{display:none}
+.dchip{padding:9px 15px;border-radius:22px;font-weight:800;font-size:13px;border:1.5px solid var(--line);color:var(--ink2);flex:none;background:var(--surface);cursor:pointer}
+.dchip.on{background:var(--rail);color:#EDE6D8;border-color:var(--rail)}
 </style>
 </head>
 <body>
@@ -104,6 +108,7 @@ var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neel
 var HUBCODE='0112';
 var KIDCOL={Caden:'#B8974E',Gavin:'#7C8666',Amber:'#B08463',Ryan:'#6E7E83'};
 var TAB='chores';
+var VIEWDAY=-1; // -1 = today; 0..6 = Mon..Sun
 var STATE=null, fbAuth=null, fbDoc=null, fbUser=null, _synced=false, _dirty=false, _saveT=null, _ready=false;
 
 /* ---------- helpers ---------- */
@@ -122,6 +127,7 @@ function kids(){return Object.keys(BAL());}
 function choreDaysInfo(c){var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];var days=Array.isArray(c[9])?c[9]:[];var idxs=days.map(function(d){return DOW.indexOf(d);}).filter(function(x){return x>=0;});var win=c[10]||'Today Only';var m=String(win).match(/\d/);var span=m?parseInt(m[0],10):1;if(span<1)span=1;return {idxs:idxs,span:span};}
 function scheduledToday(c){var hasDays=Array.isArray(c[9])&&c[9].length>0;if(c[12]&&!hasDays)return c[12]===todayYMD();var info=choreDaysInfo(c);if(!info.idxs.length)return true;var t=(new Date().getDay()+6)%7;for(var k=0;k<info.idxs.length;k++){if(((t-info.idxs[k])+7)%7<info.span)return true;}return false;}
 function activeToday(c){return c[11]?true:scheduledToday(c);}
+function scheduledOnWd(c,wd){if(c[12])return false;var info=choreDaysInfo(c);if(!info.idxs.length)return true;for(var k=0;k<info.idxs.length;k++){if(((wd-info.idxs[k])+7)%7<info.span)return true;}return false;}
 
 /* keep the view correct without depending on the wall tablet's nightly reset (same rules as the main app) */
 function reconcile(){
@@ -281,6 +287,7 @@ document.getElementById('modal').addEventListener('click',function(e){if(e.targe
 /* ---------- render ---------- */
 function ic(name){var p={home:'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10',check:'M5 4.5h14v16H5zM9 4.5a3 3 0 0 1 6 0M8.5 12.5l2 2 4-4.5',bank:'M4 9 12 4l8 5M5 9v9h14V9M9 18v-5h6v5'}[name]||'';return '<svg viewBox="0 0 24 24"><path d="'+p+'"/></svg>';}
 function go(t){TAB=t;render();document.querySelector('.stage').scrollTop=0;}
+function setViewDay(d){VIEWDAY=d;render();var st=document.querySelector('.stage');if(st)st.scrollTop=0;}
 
 function render(){
   var app=document.getElementById('app');
@@ -307,20 +314,29 @@ function choreRow(c,i){
   var pay=c[4]?'<span class="pay">'+esc(c[4])+'</span>':'';
   return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+choreControl(c,i)+'</div>';
 }
+function previewRow(c){var pay=c[4]?'<span class="pay">'+esc(c[4])+'</span>':'';return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+'</div>';}
 function choresView(){
   var list=CH(),ap=AP();
-  var dstr=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-  var out='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px"><div><div style="font-size:22px;font-weight:800;line-height:1">Today’s Chores</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+dstr+'</div></div><button onclick="addChore()" style="height:44px;padding:0 16px;background:var(--sage);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;flex:none">+ Add</button></div>';
-  if(ap.length){out+='<div class="banner"><span class="n">'+ap.length+'</span><div><b>'+ap.length+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openApprovals()">Review</span></div>';}
+  var DOW3=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var DOWfull=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  var todWd=(new Date().getDay()+6)%7;
+  var isToday=(VIEWDAY===-1);
+  var wd=isToday?todWd:VIEWDAY;
+  var title=isToday?'Today’s Chores':DOWfull[wd]+'’s Chores';
+  var sub=isToday?new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}):'What’s scheduled';
+  var out='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:22px;font-weight:800;line-height:1">'+title+'</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+sub+'</div></div><button onclick="addChore()" style="height:44px;padding:0 16px;background:var(--sage);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;flex:none">+ Add</button></div>';
+  var dchips=[{v:-1,l:'Today'}];for(var d=0;d<7;d++)dchips.push({v:d,l:DOW3[d]});
+  out+='<div class="dayfilter">'+dchips.map(function(c){return '<span class="dchip'+((VIEWDAY===c.v)?' on':'')+'" onclick="setViewDay('+c.v+')">'+c.l+'</span>';}).join('')+'</div>';
+  if(isToday&&ap.length){out+='<div class="banner"><span class="n">'+ap.length+'</span><div><b>'+ap.length+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openApprovals()">Review</span></div>';}
   var ks=kids();if(!ks.length)ks=['Caden','Gavin'];
   ks.forEach(function(kid){
     var rows=[];
-    for(var i=0;i<list.length;i++){if(list[i]&&list[i][0]===kid&&activeToday(list[i]))rows.push(i);}
-    rows.sort(function(a,b){var pa=(list[a][5]==='done'||list[a][5]==='skip')?1:0,pb=(list[b][5]==='done'||list[b][5]==='skip')?1:0;return pa-pb;});
+    for(var i=0;i<list.length;i++){var c=list[i];if(!c||c[0]!==kid)continue;var show=isToday?activeToday(c):scheduledOnWd(c,wd);if(show)rows.push(i);}
+    if(isToday)rows.sort(function(a,b){var pa=(list[a][5]==='done'||list[a][5]==='skip')?1:0,pb=(list[b][5]==='done'||list[b][5]==='skip')?1:0;return pa-pb;});
     var b=BAL()[kid]||{bal:0};
     var col=KIDCOL[kid]||'#999';
     var dollars=Math.floor(b.bal||0),cents=('0'+Math.round(((b.bal||0)-dollars)*100)).slice(-2);
-    var inner=rows.length?rows.map(function(i){return choreRow(list[i],i);}).join(''):'<div class="empty">Nothing left today — nice work! 🎉</div>';
+    var inner=rows.length?rows.map(function(i){return isToday?choreRow(list[i],i):previewRow(list[i]);}).join(''):'<div class="empty">'+(isToday?'Nothing left today — nice work! 🎉':'No chores on '+DOWfull[wd]+'.')+'</div>';
     out+='<div class="card"><div class="in"><div class="kidhead"><span class="av" style="background:'+col+'">'+esc(kid[0])+'</span><div class="kidname">'+esc(kid)+'</div><div class="kidbal">$'+dollars+'<span class="c">.'+cents+'</span></div></div></div><div class="in" style="padding-top:2px">'+inner+'</div></div>';
   });
   return out;

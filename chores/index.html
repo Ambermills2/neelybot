@@ -133,7 +133,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-5a';
+var BUILD='KIDS-5b';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#7E5A9B',Ryan:'#B8453C'};
@@ -245,6 +245,9 @@ function subscribe(){
 /* one-time: seed this app's own document from the old shared one (chores + banking only) */
 function importFromMain(){
   if(!fbMain||STATE)return;
+  /* only a real Google session can read the old doc — an anonymous visitor must
+     NOT write a blank doc first, or the import would never happen */
+  if(!fbUser||fbUser.isAnonymous){STATE=blankState();render();return;}
   fbMain.get().then(function(sn){
     if(!sn.exists){STATE=blankState();save();render();return;}
     var d=sn.data(),old=null;

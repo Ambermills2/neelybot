@@ -133,7 +133,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-var BUILD='KIDS-4e';
+var BUILD='KIDS-5a';
 var FB_CONFIG={apiKey:"AIzaSyAqsEUVO0Wge8tLcVj3O5VkmeM8spynH0k",authDomain:"neelybot-b5edc.firebaseapp.com",projectId:"neelybot-b5edc"};
 var HUBCODE='0112';
 var KIDCOL={Caden:'#4E7A9B',Gavin:'#7C8666',Amber:'#7E5A9B',Ryan:'#B8453C'};
@@ -141,7 +141,8 @@ var PEOPLE=['Caden','Gavin','Amber','Ryan'];
 var TAB='chores';
 var VIEWDAY=-1; // -1 = today; 0..6 = Mon..Sun
 var TXSHOW={}; // per-kid transaction count shown
-var STATE=null, fbAuth=null, fbDoc=null, fbUser=null, _synced=false, _dirty=false, _saveT=null, _ready=false;
+var _needLogin=false;
+var STATE=null, fbAuth=null, fbDoc=null, fbMain=null, fbUser=null, _synced=false, _dirty=false, _saveT=null, _ready=false;
 
 /* ---------- helpers ---------- */
 function pad2(n){return (n<10?'0':'')+n;}
@@ -217,21 +218,48 @@ function fbInit(){
     fbAuth=firebase.auth();
     var db=firebase.firestore();
     try{db.enablePersistence({synchronizeTabs:true}).catch(function(){});}catch(e){}
-    fbDoc=db.collection('households').doc('main');
+    fbDoc=db.collection('households').doc('chores');
+    fbMain=db.collection('households').doc('main');
     _ready=true;
-    fbAuth.onAuthStateChanged(function(u){fbUser=u;if(u){subscribe();}render();});
+    fbAuth.onAuthStateChanged(function(u){
+      fbUser=u;
+      if(u){subscribe();render();return;}
+      /* no account: try to open the chores doc anonymously (works once the rules allow it) */
+      fbAuth.signInAnonymously().then(function(){/* onAuthStateChanged fires again */})
+        .catch(function(){_needLogin=true;render();});
+    });
   }catch(e){console.warn('fbInit',e);}
 }
 function subscribe(){
   _synced=false;_dirty=false;
   fbDoc.onSnapshot(function(snap){
-    if(!snap.exists){_synced=true;return;}
+    if(!snap.exists){_synced=true;importFromMain();return;}
     var data=snap.data();_synced=true;
     if(_dirty)return; // don't clobber an unsaved local edit
     if(data&&data.stateJson){try{STATE=JSON.parse(data.stateJson);}catch(e){}}
     rollWeek();reconcile();sweepUndone();render();
-  },function(err){console.warn('snapshot',err);});
+  },function(err){console.warn('snapshot',err);
+    if(err&&/permission/i.test(err.code||err.message||'')){_needLogin=true;render();}
+  });
 }
+/* one-time: seed this app's own document from the old shared one (chores + banking only) */
+function importFromMain(){
+  if(!fbMain||STATE)return;
+  fbMain.get().then(function(sn){
+    if(!sn.exists){STATE=blankState();save();render();return;}
+    var d=sn.data(),old=null;
+    try{old=d&&d.stateJson?JSON.parse(d.stateJson):null;}catch(e){}
+    STATE=blankState();
+    if(old){
+      if(Array.isArray(old.CHORES))STATE.CHORES=old.CHORES;
+      if(Array.isArray(old.APPROVALS))STATE.APPROVALS=old.APPROVALS;
+      if(old.KIDBAL&&typeof old.KIDBAL==='object')STATE.KIDBAL=old.KIDBAL;
+      if(old.KIDTX&&typeof old.KIDTX==='object')STATE.KIDTX=old.KIDTX;
+    }
+    rollWeek();reconcile();save();render();toast('Chores & banking loaded');
+  }).catch(function(){STATE=blankState();save();render();});
+}
+function blankState(){return {CHORES:[],APPROVALS:[],KIDBAL:{Caden:{bal:0,wk:0},Gavin:{bal:0,wk:0}},KIDTX:{Caden:[],Gavin:[]},BANKREQ:[],APPLOG:[],WEEKSTART:''};}
 function signIn(){if(!_ready){toast('Still loading…');return;}var p=new firebase.auth.GoogleAuthProvider();fbAuth.signInWithPopup(p).catch(function(e){if(e&&e.code!=='auth/popup-closed-by-user')toast('Sign-in did not finish');});}
 function save(){
   if(!fbUser||!_synced||!STATE)return;
@@ -608,7 +636,7 @@ function render(){
     +(fbUser?'<span class="who">'+esc((fbUser.displayName||fbUser.email||'').split(' ')[0]||'Synced')+'</span>':'<span class="who">Sign in</span>')
     +'</div>';
   var body;
-  if(!fbUser){
+  if(!fbUser&&_needLogin){
     body='<div class="stage"><div class="signin"><h2>Grove Chores</h2><p>Sign in with the family Google account to load Caden &amp; Gavin’s chores and banks. Everything stays in sync with the wall tablet.</p><button class="gbtn" onclick="signIn()">Sign in with Google</button></div><div class="build">Build '+BUILD+'</div></div>';
     app.innerHTML=head+body;return;
   }

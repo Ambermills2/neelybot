@@ -176,6 +176,43 @@ function undoDone(i){var c=CH()[i];if(!c||c[5]!=='done')return;var kid=c[0],amt=
 function skip(i){var c=CH()[i];if(!c)return;gate('Enter the Hub Code to skip',function(){c[5]='skip';c[13]=todayYMD();save();render();toast(c[3]+' skipped for today ⏭');});}
 function unskip(i){var c=CH()[i];if(!c||c[5]!=='skip')return;c[5]='todo';c[13]='';save();render();toast('Un-skipped');}
 
+/* ---------- add chore ---------- */
+function lbl(t){return '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3);margin:12px 0 5px">'+t+'</div>';}
+function addChore(){
+  var days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var h='<h3>Add Chore</h3>'
+    +lbl('Chore')+'<input id="ncTitle" class="fld" placeholder="e.g. Take Out Trash">'
+    +lbl('Who')+'<div id="ncWho" style="display:flex;gap:9px">'+['Caden','Gavin'].map(function(k){var on=k==='Caden';return '<div class="whobtn" data-k="'+k+'" data-on="'+(on?'1':'0')+'" onclick="ncWho(this)" style="flex:1;height:48px;border-radius:12px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;cursor:pointer;'+(on?'background:'+KIDCOL[k]+';color:#fff;border-color:'+KIDCOL[k]:'color:var(--ink2)')+'"><span class="av" style="width:22px;height:22px;font-size:11px;background:'+(on?'rgba(255,255,255,.25)':KIDCOL[k])+'">'+k[0]+'</span>'+k+'</div>';}).join('')+'</div>'
+    +lbl('Pay')+'<input id="ncPay" class="fld" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">'
+    +lbl('When')
+    +'<div style="margin-bottom:6px"><span id="ncToday" data-on="0" onclick="ncTodayToggle(this)" class="chip skip" style="cursor:pointer">Today Only · one time</span></div>'
+    +'<div id="ncDayWrap"><div style="font-size:11px;color:var(--ink3);margin-bottom:6px">Or repeat on these days</div>'
+    +'<div style="display:flex;gap:7px;flex-wrap:wrap">'+days.map(function(d){return '<span class="ncday" data-d="'+d+'" data-on="0" onclick="ncDay(this)" style="cursor:pointer;padding:10px 13px;border-radius:11px;border:1.5px solid var(--line);font-weight:800;font-size:13px">'+d+'</span>';}).join('')+'</div>'
+    +'<div style="display:flex;gap:16px;margin-top:9px;font-size:13px;font-weight:800;color:var(--saged)"><span onclick="ncSetDays([\'Mon\',\'Tue\',\'Wed\',\'Thu\',\'Fri\'])">Mon–Fri</span><span onclick="ncSetDays([\'Mon\',\'Tue\',\'Wed\',\'Thu\',\'Fri\',\'Sat\',\'Sun\'])">Every day</span><span onclick="ncSetDays([])" style="color:var(--ink3)">Clear</span></div></div>'
+    +lbl('Description')+'<textarea id="ncDesc" class="fld" style="height:74px;padding-top:12px;line-height:1.4" placeholder="What exactly to do…"></textarea>'
+    +'<div class="row2" style="margin-top:14px"><button class="b-ghost" onclick="closeSheet()">Cancel</button><button class="b-green" onclick="saveNewChore()">Add Chore</button></div>';
+  sheetHTML(h);
+  setTimeout(function(){var e=document.getElementById('ncTitle');if(e)e.focus();},80);
+}
+function ncWho(el){document.querySelectorAll('#ncWho .whobtn').forEach(function(b){var k=b.getAttribute('data-k');b.setAttribute('data-on','0');b.style.background='none';b.style.color='var(--ink2)';b.style.borderColor='var(--line)';var a=b.querySelector('.av');if(a)a.style.background=KIDCOL[k]||'#999';});el.setAttribute('data-on','1');var k=el.getAttribute('data-k');el.style.background=KIDCOL[k];el.style.color='#fff';el.style.borderColor=KIDCOL[k];var av=el.querySelector('.av');if(av)av.style.background='rgba(255,255,255,.25)';}
+function ncDay(el){var on=el.getAttribute('data-on')!=='1';el.setAttribute('data-on',on?'1':'0');el.style.background=on?'var(--sage)':'none';el.style.color=on?'#fff':'var(--ink)';el.style.borderColor=on?'var(--sage)':'var(--line)';}
+function ncSetDays(arr){document.querySelectorAll('#ncDayWrap .ncday').forEach(function(el){var on=arr.indexOf(el.getAttribute('data-d'))>=0;el.setAttribute('data-on',on?'1':'0');el.style.background=on?'var(--sage)':'none';el.style.color=on?'#fff':'var(--ink)';el.style.borderColor=on?'var(--sage)':'var(--line)';});}
+function ncTodayToggle(el){var on=el.getAttribute('data-on')!=='1';el.setAttribute('data-on',on?'1':'0');el.className='chip '+(on?'done':'skip');el.style.cursor='pointer';var w=document.getElementById('ncDayWrap');if(w){w.style.opacity=on?'.4':'';w.style.pointerEvents=on?'none':'';}if(on)ncSetDays([]);}
+function saveNewChore(){
+  var title=((document.getElementById('ncTitle')||{}).value||'').trim();if(!title){toast('Add a chore name');return;}
+  var who='Caden';var w=document.querySelector('#ncWho .whobtn[data-on="1"]');if(w)who=w.getAttribute('data-k');
+  var pay='$'+(Number((document.getElementById('ncPay')||{}).value)||0).toFixed(2);
+  var desc=((document.getElementById('ncDesc')||{}).value||'').trim();
+  var todayOnly=(document.getElementById('ncToday')||{}).getAttribute&&document.getElementById('ncToday').getAttribute('data-on')==='1';
+  var days=[].slice.call(document.querySelectorAll('#ncDayWrap .ncday')).filter(function(el){return el.getAttribute('data-on')==='1';}).map(function(el){return el.getAttribute('data-d');});
+  if(todayOnly)days=[];
+  var oneDate=todayOnly?todayYMD():'';
+  var dl=todayOnly?'Today Only':(days.length===7?'Every Day':days.length?days.join(' · '):'Daily');
+  if(!STATE.CHORES)STATE.CHORES=[];
+  STATE.CHORES.push([who,KIDCOL[who]||'#999','Daily',title,pay,'todo',0,desc,dl,days,'Today Only',0,oneDate,'']);
+  save();closeSheet();render();toast('Chore added ✅');
+}
+
 function openApprovals(){gate('Enter the Hub Code to review',showApprovals);}
 function showApprovals(){
   var ap=AP();
@@ -271,7 +308,9 @@ function choreRow(c,i){
   return '<div class="chore"><div class="body"><div class="ttl">'+c[3]+'</div>'+(c[7]?'<div class="desc">'+c[7]+'</div>':'')+'</div>'+pay+choreControl(c,i)+'</div>';
 }
 function choresView(){
-  var list=CH(),ap=AP(),out='';
+  var list=CH(),ap=AP();
+  var dstr=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  var out='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px"><div><div style="font-size:22px;font-weight:800;line-height:1">Today’s Chores</div><div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'+dstr+'</div></div><button onclick="addChore()" style="height:44px;padding:0 16px;background:var(--sage);color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;flex:none">+ Add</button></div>';
   if(ap.length){out+='<div class="banner"><span class="n">'+ap.length+'</span><div><b>'+ap.length+' waiting</b><div style="font-size:11.5px;color:var(--goldd)">Tap to approve &amp; pay</div></div><span class="go" onclick="openApprovals()">Review</span></div>';}
   var ks=kids();if(!ks.length)ks=['Caden','Gavin'];
   ks.forEach(function(kid){
